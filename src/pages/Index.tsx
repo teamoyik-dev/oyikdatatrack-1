@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Currency, Subscription } from "@/lib/types";
-import { mockSpendTrend } from "@/lib/mock-data";
 import {
   fetchSubscriptions,
   createSubscription,
@@ -12,6 +11,7 @@ import {
   getActiveCount,
   getUpcomingPayments,
   formatCurrency,
+  getSpendTrend,
 } from "@/lib/subscription-utils";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -80,7 +80,7 @@ const Index = () => {
             activeCount={activeCount}
             upcomingCount={upcomingCount}
           />
-          <SpendChart data={mockSpendTrend} />
+          <SpendChart data={getSpendTrend(subs, baseCurrency)} />
           <SubscriptionsTable
             subscriptions={subs}
             baseCurrency={baseCurrency}

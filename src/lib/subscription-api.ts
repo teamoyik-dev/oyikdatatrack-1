@@ -1,34 +1,64 @@
+import { supabase } from "./supabase";
 import { Subscription } from "./types";
-import { mockSubscriptions } from "./mock-data";
-
-// Simulated async CRUD – ready to replace with Supabase client
-let subscriptions = [...mockSubscriptions];
 
 export async function fetchSubscriptions(): Promise<Subscription[]> {
-  await new Promise((r) => setTimeout(r, 300));
-  return [...subscriptions];
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching subscriptions:", error);
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as Subscription[];
 }
 
-export async function createSubscription(data: Omit<Subscription, "id" | "created_at">): Promise<Subscription> {
-  await new Promise((r) => setTimeout(r, 200));
-  const newSub: Subscription = {
-    ...data,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-  };
-  subscriptions.push(newSub);
-  return newSub;
+export async function createSubscription(
+  payload: Omit<Subscription, "id" | "created_at">
+): Promise<Subscription> {
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .insert(payload)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating subscription:", error);
+    throw new Error(error.message);
+  }
+
+  return data as Subscription;
 }
 
-export async function updateSubscription(id: string, data: Partial<Subscription>): Promise<Subscription> {
-  await new Promise((r) => setTimeout(r, 200));
-  const idx = subscriptions.findIndex((s) => s.id === id);
-  if (idx === -1) throw new Error("Subscription not found");
-  subscriptions[idx] = { ...subscriptions[idx], ...data };
-  return subscriptions[idx];
+export async function updateSubscription(
+  id: string,
+  payload: Partial<Subscription>
+): Promise<Subscription> {
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .update(payload)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating subscription:", error);
+    throw new Error(error.message);
+  }
+
+  return data as Subscription;
 }
 
 export async function deleteSubscription(id: string): Promise<void> {
-  await new Promise((r) => setTimeout(r, 200));
-  subscriptions = subscriptions.filter((s) => s.id !== id);
+  const { error } = await supabase
+    .from("subscriptions")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error deleting subscription:", error);
+    throw new Error(error.message);
+  }
 }

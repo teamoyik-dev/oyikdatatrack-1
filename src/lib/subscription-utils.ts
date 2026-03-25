@@ -46,3 +46,22 @@ export function formatCurrency(amount: number, currency: Currency): string {
 }
 
 export const currencySymbol = (c: Currency) => (c === "USD" ? "$" : "£");
+
+export function getSpendTrend(subs: Subscription[], baseCurrency: Currency): { month: string; amount: number }[] {
+  const now = new Date();
+  const months: { month: string; amount: number }[] = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = d.toLocaleString("default", { month: "short" });
+    const total = subs
+      .filter((s) => {
+        const subDate = new Date(s.subscription_date);
+        return s.status === "active" && subDate <= d;
+      })
+      .reduce((sum, s) => sum + convertCurrency(s.amount, s.currency, baseCurrency), 0);
+    months.push({ month: label, amount: Math.round(total) });
+  }
+
+  return months;
+}
