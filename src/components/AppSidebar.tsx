@@ -9,7 +9,7 @@ import {
   HelpCircle,
   ChevronLeft,
 } from "lucide-react";
-import oyikLogo from "@/assets/oyik-logo.png";
+import oyikLogo from "@/assets/new-logo.png";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -27,13 +27,16 @@ export function AppSidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className={`fixed left-0 top-0 h-screen z-40 glass-card border-r border-white/[0.06] flex flex-col transition-all duration-300 ${
-        collapsed ? "w-[72px]" : "w-[240px]"
-      }`}
+      className={`fixed left-0 top-0 h-screen z-40 glass-card border-r border-white/[0.06] flex flex-col transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"
+        }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-16 border-b border-white/[0.06]">
-        <img src={oyikLogo} alt="Oyik.ai" className="h-8 w-auto" />
+      <div className="flex items-center gap-3 px-5 h-20 border-b border-white/[0.06]">
+        <img
+          src={oyikLogo}
+          alt="Oyik.ai"
+          className={`transition-all duration-300 object-contain origin-left ${collapsed ? "w-8 h-8 object-left" : "w-36 h-auto max-h-12"}`}
+        />
       </div>
 
       {/* Collapse toggle */}
@@ -55,11 +58,10 @@ export function AppSidebar() {
             <Link
               key={item.label}
               to={item.path}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
-                isActive
-                  ? "gradient-purple-blue text-primary-foreground glow-purple"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-              }`}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${isActive
+                ? "gradient-purple-blue text-primary-foreground glow-purple"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                }`}
             >
               <item.icon size={20} className="shrink-0" />
               {!collapsed && <span>{item.label}</span>}
