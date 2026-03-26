@@ -2,16 +2,29 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { SpendChart } from "@/components/SpendChart";
 import { useState, useEffect } from "react";
-import { Subscription } from "@/lib/types";
+import { MonthlySnapshot, Subscription } from "@/lib/types";
 import { fetchSubscriptions } from "@/lib/subscription-api";
 import { getSpendTrend } from "@/lib/subscription-utils";
 import { QuickStats } from "@/components/QuickStats";
+import { fetchSnapshots, ensurePreviousMonthSnapshot } from "@/lib/snapshot-api";
 
 const Analytics = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
+  const [snapshots, setSnapshots] = useState<MonthlySnapshot[]>([]);
 
   useEffect(() => {
-    fetchSubscriptions().then(setSubs);
+    async function init() {
+      const [s, sn] = await Promise.all([
+        fetchSubscriptions(),
+        fetchSnapshots()
+      ]);
+      setSubs(s);
+      setSnapshots(sn);
+
+      // Auto-capture previous month if missing
+      ensurePreviousMonthSnapshot(s);
+    }
+    init();
   }, []);
 
   return (
@@ -29,7 +42,7 @@ const Analytics = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <SpendChart data={getSpendTrend(subs)} />
+              <SpendChart data={getSpendTrend(subs, snapshots)} />
             </div>
             <div>
               <QuickStats subs={subs} />

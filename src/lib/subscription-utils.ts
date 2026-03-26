@@ -1,4 +1,4 @@
-import { Subscription } from "./types";
+import { MonthlySnapshot, Subscription } from "./types";
 
 export function getUKNow(): Date {
   return new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/London" }));
@@ -48,7 +48,10 @@ export function formatPound(amount: number): string {
   return `£${amount.toFixed(2)}`;
 }
 
-export function getSpendTrend(subs: Subscription[]): { month: string; amount: number }[] {
+export function getSpendTrend(
+  subs: Subscription[],
+  snapshots: MonthlySnapshot[] = []
+): { month: string; amount: number }[] {
   const now = getUKNow();
 
   const totalMonthsBack = 6;
@@ -64,6 +67,18 @@ export function getSpendTrend(subs: Subscription[]): { month: string; amount: nu
       ? monthStart.toLocaleString("default", { month: "short", year: "2-digit" })
       : monthStart.toLocaleString("default", { month: "short" });
 
+    const monthKey = monthStart.toISOString().substring(0, 7); // "YYYY-MM"
+
+    // 1. Check if we have a snapshot for this month
+    const snapshot = snapshots.find((s) => s.month === monthKey);
+
+    if (snapshot && !isCurrentMonth) {
+      // Use the frozen snapshot data for past months
+      months.push({ month: label, amount: snapshot.total_spend });
+      continue;
+    }
+
+    // 2. Fall back to live calculation
     // For each month, sum up subscriptions that had started by that month.
     // Past months: include ALL subs (active + canceled) that existed then.
     // Current month: only count currently active subscriptions.
