@@ -2,12 +2,10 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Currency } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
 import { LogOut } from "lucide-react";
 
 const Settings = () => {
-  const [baseCurrency, setBaseCurrency] = useState<Currency>("USD");
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -21,8 +19,6 @@ const Settings = () => {
       <AppSidebar />
       <div className="flex-1 ml-[240px] flex flex-col">
         <DashboardHeader
-          baseCurrency={baseCurrency}
-          onCurrencyToggle={() => setBaseCurrency((c) => (c === "USD" ? "GBP" : "USD"))}
           onAddClick={() => { }}
         />
         <main className="flex-1 p-6 space-y-6 overflow-y-auto">

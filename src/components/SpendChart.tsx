@@ -43,7 +43,7 @@ export function SpendChart({ data }: SpendChartProps) {
             tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 12 }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v) => `$${v}`}
+            tickFormatter={(v) => `£${v}`}
           />
           <Tooltip
             contentStyle={{
@@ -53,7 +53,7 @@ export function SpendChart({ data }: SpendChartProps) {
               color: "#fff",
               fontSize: 13,
             }}
-            formatter={(value: number) => [`$${value}`, "Spend"]}
+            formatter={(value: number) => [`£${value}`, "Spend"]}
           />
           <Area
             type="monotone"

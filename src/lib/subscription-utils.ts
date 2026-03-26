@@ -1,19 +1,11 @@
-import { Subscription, Currency } from "./types";
+import { Subscription } from "./types";
 
-const EXCHANGE_RATES: Record<string, number> = {
-  "USD_GBP": 0.8,
-  "GBP_USD": 1.25,
-  "USD_USD": 1,
-  "GBP_GBP": 1,
-};
-
-export function convertCurrency(amount: number, from: Currency, to: Currency): number {
-  const key = `${from}_${to}`;
-  return amount * (EXCHANGE_RATES[key] ?? 1);
+export function getUKNow(): Date {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/London" }));
 }
 
 export function getNextBillingDate(billingDay: number): Date {
-  const now = new Date();
+  const now = getUKNow();
   const thisMonth = new Date(now.getFullYear(), now.getMonth(), billingDay);
   if (thisMonth > now) return thisMonth;
   return new Date(now.getFullYear(), now.getMonth() + 1, billingDay);
@@ -21,15 +13,15 @@ export function getNextBillingDate(billingDay: number): Date {
 
 export function getDaysRemaining(billingDay: number): number {
   const next = getNextBillingDate(billingDay);
-  const now = new Date();
+  const now = getUKNow();
   const diff = next.getTime() - now.getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-export function getTotalMonthlySpend(subs: Subscription[], baseCurrency: Currency): number {
+export function getTotalMonthlySpend(subs: Subscription[]): number {
   return subs
     .filter((s) => s.status === "active")
-    .reduce((sum, s) => sum + convertCurrency(s.amount, s.currency, baseCurrency), 0);
+    .reduce((sum, s) => sum + s.amount, 0);
 }
 
 export function getActiveCount(subs: Subscription[]): number {
@@ -40,28 +32,52 @@ export function getUpcomingPayments(subs: Subscription[]): number {
   return subs.filter((s) => s.status === "active" && getDaysRemaining(s.billing_day) <= 7).length;
 }
 
-export function formatCurrency(amount: number, currency: Currency): string {
-  const symbol = currency === "USD" ? "$" : "£";
-  return `${symbol}${amount.toFixed(2)}`;
+export function formatPound(amount: number): string {
+  return `£${amount.toFixed(2)}`;
 }
 
-export const currencySymbol = (c: Currency) => (c === "USD" ? "$" : "£");
+export function getSpendTrend(subs: Subscription[]): { month: string; amount: number }[] {
+  const now = getUKNow();
 
-export function getSpendTrend(subs: Subscription[], baseCurrency: Currency): { month: string; amount: number }[] {
-  const now = new Date();
+  const totalMonthsBack = 6;
+  const showYear = false;
   const months: { month: string; amount: number }[] = [];
 
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = d.toLocaleString("default", { month: "short" });
+  for (let i = totalMonthsBack - 1; i >= 0; i--) {
+    const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+    const isCurrentMonth = i === 0;
+
+    const label = showYear
+      ? monthStart.toLocaleString("default", { month: "short", year: "2-digit" })
+      : monthStart.toLocaleString("default", { month: "short" });
+
+    // For each month, sum up subscriptions that had started by that month.
+    // Past months: include ALL subs (active + canceled) that existed then.
+    // Current month: only count currently active subscriptions.
     const total = subs
       .filter((s) => {
         const subDate = new Date(s.subscription_date);
-        return s.status === "active" && subDate <= d;
+        const startedByThisMonth = subDate <= monthEnd;
+        if (!startedByThisMonth) return false;
+
+        if (s.status === "canceled" && s.canceled_date) {
+          const canceledDate = new Date(s.canceled_date);
+          if (canceledDate <= monthEnd) return false;
+        }
+
+        if (isCurrentMonth) return s.status === "active";
+        return true;
       })
-      .reduce((sum, s) => sum + convertCurrency(s.amount, s.currency, baseCurrency), 0);
-    months.push({ month: label, amount: Math.round(total) });
+      .reduce((sum, s) => {
+        const monthlyAmount =
+          s.billing_cycle === "yearly" ? s.amount / 12 : s.amount;
+        return sum + monthlyAmount;
+      }, 0);
+
+    months.push({ month: label, amount: Math.round(total * 100) / 100 });
   }
 
   return months;
 }
+

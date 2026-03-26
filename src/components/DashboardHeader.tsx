@@ -1,14 +1,10 @@
 import { Search, Plus, User } from "lucide-react";
-import { Currency } from "@/lib/types";
 import { motion } from "framer-motion";
-
 interface DashboardHeaderProps {
-  baseCurrency: Currency;
-  onCurrencyToggle: () => void;
   onAddClick: () => void;
 }
 
-export function DashboardHeader({ baseCurrency, onCurrencyToggle, onAddClick }: DashboardHeaderProps) {
+export function DashboardHeader({ onAddClick }: DashboardHeaderProps) {
   return (
     <motion.header
       initial={{ y: -10, opacity: 0 }}
@@ -27,14 +23,6 @@ export function DashboardHeader({ baseCurrency, onCurrencyToggle, onAddClick }: 
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Currency Toggle */}
-        <button
-          onClick={onCurrencyToggle}
-          className="h-9 px-4 rounded-lg text-xs font-semibold glass-card hover:bg-white/[0.08] transition-all"
-        >
-          Base: {baseCurrency === "USD" ? "$ USD" : "£ GBP"}
-        </button>
-
         {/* Add Button */}
         <button
           onClick={onAddClick}

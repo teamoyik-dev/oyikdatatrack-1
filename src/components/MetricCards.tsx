@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { DollarSign, CreditCard, Clock } from "lucide-react";
+import { PoundSterling, CreditCard, Clock } from "lucide-react";
 
 interface MetricCardsProps {
   totalSpend: string;
@@ -21,7 +21,7 @@ export function MetricCards({ totalSpend, activeCount, upcomingCount }: MetricCa
     {
       title: "Total Monthly Spend",
       value: totalSpend,
-      icon: DollarSign,
+      icon: PoundSterling,
       gradient: "from-primary to-secondary",
       glow: "glow-purple",
     },
