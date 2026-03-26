@@ -22,3 +22,12 @@ export interface SpendTrend {
   month: string;
   amount: number;
 }
+
+export interface MonthlySnapshot {
+  id: string;
+  month: string; // e.g. "2026-03"
+  total_spend: number;
+  subscription_count: number;
+  snapshot_data: any; // per-subscription breakdown
+  created_at: string;
+}

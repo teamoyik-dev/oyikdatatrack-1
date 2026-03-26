@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Subscription } from "@/lib/types";
+import { Subscription, MonthlySnapshot } from "@/lib/types";
 import {
   fetchSubscriptions,
   createSubscription,
   deleteSubscription,
   updateSubscription,
 } from "@/lib/subscription-api";
+import { fetchSnapshots, ensurePreviousMonthSnapshot } from "@/lib/snapshot-api";
 import {
   getTotalMonthlySpend,
   getActiveCount,
@@ -24,11 +25,23 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
+  const [snapshots, setSnapshots] = useState<MonthlySnapshot[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editSub, setEditSub] = useState<Subscription | null>(null);
 
   useEffect(() => {
-    fetchSubscriptions().then(setSubs);
+    async function init() {
+      const [s, sn] = await Promise.all([
+        fetchSubscriptions(),
+        fetchSnapshots()
+      ]);
+      setSubs(s);
+      setSnapshots(sn);
+
+      // Auto-capture previous month if missing
+      ensurePreviousMonthSnapshot(s);
+    }
+    init();
   }, []);
 
   const totalSpend = formatPound(getTotalMonthlySpend(subs));
@@ -89,7 +102,7 @@ const Index = () => {
             activeCount={activeCount}
             upcomingCount={upcomingCount}
           />
-          <SpendChart data={getSpendTrend(subs)} />
+          <SpendChart data={getSpendTrend(subs, snapshots)} />
           <SubscriptionsTable
             subscriptions={subs}
             onEdit={handleEdit}
