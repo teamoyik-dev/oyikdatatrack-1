@@ -28,6 +28,18 @@ export function getActiveCount(subs: Subscription[]): number {
   return subs.filter((s) => s.status === "active").length;
 }
 
+export function getCanceledCount(subs: Subscription[]): number {
+  return subs.filter((s) => s.status === "canceled").length;
+}
+
+export function getPremiumCount(subs: Subscription[]): number {
+  return subs.filter((s) => s.plan_type === "premium").length;
+}
+
+export function getTrialCount(subs: Subscription[]): number {
+  return subs.filter((s) => s.plan_type === "trial").length;
+}
+
 export function getUpcomingPayments(subs: Subscription[]): number {
   return subs.filter((s) => s.status === "active" && getDaysRemaining(s.billing_day) <= 7).length;
 }

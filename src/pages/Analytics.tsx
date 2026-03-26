@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Subscription } from "@/lib/types";
 import { fetchSubscriptions } from "@/lib/subscription-api";
 import { getSpendTrend } from "@/lib/subscription-utils";
+import { QuickStats } from "@/components/QuickStats";
 
 const Analytics = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
@@ -25,7 +26,16 @@ const Analytics = () => {
             <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
             <p className="text-sm text-muted-foreground mt-1">Detailed spending insights and trends</p>
           </div>
-          <SpendChart data={getSpendTrend(subs)} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <SpendChart data={getSpendTrend(subs)} />
+            </div>
+            <div>
+              <QuickStats subs={subs} />
+            </div>
+          </div>
+
           <div className="glass-card rounded-xl p-6">
             <p className="text-muted-foreground text-sm">More analytics coming soon — category breakdowns, cost projections, and usage patterns.</p>
           </div>
