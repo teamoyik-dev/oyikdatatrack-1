@@ -94,15 +94,17 @@ export function SubscriptionsTable({
                       <span className="font-medium text-foreground">{sub.platform}</span>
                     </div>
                   </td>
-                  {formatPound(converted)}
+                  <td className="px-4 py-3.5 font-semibold text-foreground">
+                    {formatPound(converted)}
+                  </td>
                   <td className="px-4 py-3.5 text-muted-foreground capitalize">
                     {sub.billing_day}th of every month
                   </td>
                   <td className="px-4 py-3.5">
                     <span
                       className={`font-semibold ${sub.status === "active" && days <= 3
-                          ? "text-red-400 animate-glow-pulse"
-                          : "text-muted-foreground"
+                        ? "text-red-400 animate-glow-pulse"
+                        : "text-muted-foreground"
                         }`}
                     >
                       {sub.status === "active" ? `${days} days` : "—"}
