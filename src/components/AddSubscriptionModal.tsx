@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { Subscription, Currency, BillingCycle, SubscriptionStatus, PlanType } from "@/lib/types";
+import { Subscription, BillingCycle, SubscriptionStatus, PlanType } from "@/lib/types";
 
 interface AddSubscriptionModalProps {
   open: boolean;
@@ -14,7 +14,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
   const getDefaultForm = (data?: Subscription | null) => ({
     platform: data?.platform || "",
     amount: data?.amount?.toString() || "",
-    currency: (data?.currency || "USD") as Currency,
+
     billing_cycle: (data?.billing_cycle || "monthly") as BillingCycle,
     billing_day: data?.billing_day?.toString() || "1",
     status: (data?.status || "active") as SubscriptionStatus,
@@ -36,13 +36,14 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
     onSubmit({
       platform: form.platform,
       amount: parseFloat(form.amount),
-      currency: form.currency,
+
       billing_cycle: form.billing_cycle,
       billing_day: parseInt(form.billing_day),
       status: form.status,
       plan_type: form.plan_type,
       payment_source: form.payment_source,
       subscription_date: form.subscription_date,
+      canceled_date: editData?.canceled_date || null,
     });
     onClose();
   };
@@ -107,18 +108,8 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className={labelClass}>Currency</label>
-                  <select
-                    className={selectClass}
-                    value={form.currency}
-                    onChange={(e) => setForm({ ...form, currency: e.target.value as Currency })}
-                  >
-                    <option value="USD">$ USD</option>
-                    <option value="GBP">£ GBP</option>
-                  </select>
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+
                 <div>
                   <label className={labelClass}>Billing Cycle</label>
                   <select

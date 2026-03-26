@@ -15,8 +15,8 @@ import {
   Database,
   Image,
 } from "lucide-react";
-import { Subscription, Currency } from "@/lib/types";
-import { getDaysRemaining, convertCurrency, currencySymbol } from "@/lib/subscription-utils";
+import { Subscription } from "@/lib/types";
+import { getDaysRemaining, formatPound } from "@/lib/subscription-utils";
 
 const iconMap: Record<string, React.ElementType> = {
   Bot, Workflow, Phone, MessageSquare, Globe, FileText, Brain, Palette, Database, Image,
@@ -36,14 +36,14 @@ const planClasses: Record<string, string> = {
 
 interface SubscriptionsTableProps {
   subscriptions: Subscription[];
-  baseCurrency: Currency;
+
   onEdit: (sub: Subscription) => void;
   onDelete: (id: string) => void;
 }
 
 export function SubscriptionsTable({
   subscriptions,
-  baseCurrency,
+
   onEdit,
   onDelete,
 }: SubscriptionsTableProps) {
@@ -79,7 +79,7 @@ export function SubscriptionsTable({
             {subscriptions.map((sub) => {
               const Icon = iconMap[sub.icon || ""] || Bot;
               const days = getDaysRemaining(sub.billing_day);
-              const converted = convertCurrency(sub.amount, sub.currency, baseCurrency);
+              const converted = sub.amount;
 
               return (
                 <tr
@@ -94,19 +94,16 @@ export function SubscriptionsTable({
                       <span className="font-medium text-foreground">{sub.platform}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5 font-semibold text-foreground">
-                    {currencySymbol(baseCurrency)}{converted.toFixed(2)}
-                  </td>
+                  {formatPound(converted)}
                   <td className="px-4 py-3.5 text-muted-foreground capitalize">
                     {sub.billing_day}th of every month
                   </td>
                   <td className="px-4 py-3.5">
                     <span
-                      className={`font-semibold ${
-                        sub.status === "active" && days <= 3
+                      className={`font-semibold ${sub.status === "active" && days <= 3
                           ? "text-red-400 animate-glow-pulse"
                           : "text-muted-foreground"
-                      }`}
+                        }`}
                     >
                       {sub.status === "active" ? `${days} days` : "—"}
                     </span>

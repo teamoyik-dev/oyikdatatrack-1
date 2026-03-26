@@ -1,4 +1,4 @@
-export type Currency = "USD" | "GBP";
+
 export type SubscriptionStatus = "active" | "canceled";
 export type PlanType = "premium" | "trial" | "trial_finished" | "basic";
 export type BillingCycle = "monthly" | "yearly";
@@ -8,7 +8,6 @@ export interface Subscription {
   platform: string;
   icon?: string;
   amount: number;
-  currency: Currency;
   billing_cycle: BillingCycle;
   subscription_date: string; // ISO date string of first billing
   billing_day: number; // day of month
@@ -16,6 +15,7 @@ export interface Subscription {
   plan_type: PlanType;
   payment_source: string;
   created_at: string;
+  canceled_date?: string | null;
 }
 
 export interface SpendTrend {

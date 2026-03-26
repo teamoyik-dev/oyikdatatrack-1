@@ -6,7 +6,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "ChatGPT",
     icon: "Bot",
     amount: 20,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-01-15",
     billing_day: 15,
@@ -20,7 +20,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "n8n",
     icon: "Workflow",
     amount: 24,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-02-06",
     billing_day: 6,
@@ -34,7 +34,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Vapi",
     icon: "Phone",
     amount: 50,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-03-01",
     billing_day: 1,
@@ -48,7 +48,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Twilio",
     icon: "MessageSquare",
     amount: 35,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-01-20",
     billing_day: 20,
@@ -62,7 +62,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Vercel",
     icon: "Globe",
     amount: 20,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-04-10",
     billing_day: 10,
@@ -76,7 +76,6 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Notion",
     icon: "FileText",
     amount: 8,
-    currency: "GBP",
     billing_cycle: "monthly",
     subscription_date: "2024-02-12",
     billing_day: 12,
@@ -90,7 +89,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Anthropic",
     icon: "Brain",
     amount: 60,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-05-01",
     billing_day: 1,
@@ -104,7 +103,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Figma",
     icon: "Palette",
     amount: 15,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-03-22",
     billing_day: 22,
@@ -118,7 +117,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Supabase",
     icon: "Database",
     amount: 25,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-06-05",
     billing_day: 5,
@@ -132,7 +131,7 @@ export const mockSubscriptions: Subscription[] = [
     platform: "Midjourney",
     icon: "Image",
     amount: 10,
-    currency: "USD",
+
     billing_cycle: "monthly",
     subscription_date: "2024-07-01",
     billing_day: 1,

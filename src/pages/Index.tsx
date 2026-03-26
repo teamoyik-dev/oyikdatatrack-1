@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Currency, Subscription } from "@/lib/types";
+import { Subscription } from "@/lib/types";
 import {
   fetchSubscriptions,
   createSubscription,
@@ -10,8 +10,9 @@ import {
   getTotalMonthlySpend,
   getActiveCount,
   getUpcomingPayments,
-  formatCurrency,
+  formatPound,
   getSpendTrend,
+  getUKNow,
 } from "@/lib/subscription-utils";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -23,7 +24,6 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
-  const [baseCurrency, setBaseCurrency] = useState<Currency>("USD");
   const [modalOpen, setModalOpen] = useState(false);
   const [editSub, setEditSub] = useState<Subscription | null>(null);
 
@@ -31,17 +31,28 @@ const Index = () => {
     fetchSubscriptions().then(setSubs);
   }, []);
 
-  const totalSpend = formatCurrency(getTotalMonthlySpend(subs, baseCurrency), baseCurrency);
+  const totalSpend = formatPound(getTotalMonthlySpend(subs));
   const activeCount = getActiveCount(subs);
   const upcomingCount = getUpcomingPayments(subs);
 
   const handleAdd = async (data: Omit<Subscription, "id" | "created_at">) => {
+    const payload = { ...data };
+
     if (editSub) {
-      const updated = await updateSubscription(editSub.id, data);
+      if (payload.status === "canceled" && editSub.status !== "canceled") {
+        payload.canceled_date = getUKNow().toISOString();
+      } else if (payload.status === "active") {
+        payload.canceled_date = null;
+      }
+
+      const updated = await updateSubscription(editSub.id, payload);
       setSubs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
       toast.success("Subscription updated");
     } else {
-      const newSub = await createSubscription(data);
+      if (payload.status === "canceled") {
+        payload.canceled_date = getUKNow().toISOString();
+      }
+      const newSub = await createSubscription(payload);
       setSubs((prev) => [...prev, newSub]);
       toast.success("Subscription added");
     }
@@ -64,8 +75,6 @@ const Index = () => {
       <AppSidebar />
       <div className="flex-1 ml-[240px] flex flex-col">
         <DashboardHeader
-          baseCurrency={baseCurrency}
-          onCurrencyToggle={() => setBaseCurrency((c) => (c === "USD" ? "GBP" : "USD"))}
           onAddClick={() => { setEditSub(null); setModalOpen(true); }}
         />
         <main className="flex-1 p-6 space-y-6 overflow-y-auto">
@@ -80,10 +89,9 @@ const Index = () => {
             activeCount={activeCount}
             upcomingCount={upcomingCount}
           />
-          <SpendChart data={getSpendTrend(subs, baseCurrency)} />
+          <SpendChart data={getSpendTrend(subs)} />
           <SubscriptionsTable
             subscriptions={subs}
-            baseCurrency={baseCurrency}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

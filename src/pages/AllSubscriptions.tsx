@@ -4,9 +4,9 @@ import {
   Bot, Workflow, Phone, MessageSquare, Globe, FileText, Brain, Palette, Database, Image,
   Calendar, CreditCard, Tag, Clock, ArrowLeft, Edit, Trash2, X,
 } from "lucide-react";
-import { Currency, Subscription } from "@/lib/types";
+import { Subscription } from "@/lib/types";
 import { fetchSubscriptions, createSubscription, deleteSubscription, updateSubscription } from "@/lib/subscription-api";
-import { getDaysRemaining, convertCurrency, currencySymbol } from "@/lib/subscription-utils";
+import { getDaysRemaining, formatPound } from "@/lib/subscription-utils";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { AddSubscriptionModal } from "@/components/AddSubscriptionModal";
@@ -30,7 +30,6 @@ const planClasses: Record<string, string> = {
 
 const AllSubscriptions = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
-  const [baseCurrency, setBaseCurrency] = useState<Currency>("USD");
   const [modalOpen, setModalOpen] = useState(false);
   const [editSub, setEditSub] = useState<Subscription | null>(null);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
@@ -65,8 +64,6 @@ const AllSubscriptions = () => {
       <AppSidebar />
       <div className="flex-1 ml-[240px] flex flex-col">
         <DashboardHeader
-          baseCurrency={baseCurrency}
-          onCurrencyToggle={() => setBaseCurrency((c) => (c === "USD" ? "GBP" : "USD"))}
           onAddClick={() => { setEditSub(null); setModalOpen(true); }}
         />
         <main className="flex-1 p-6 space-y-6 overflow-y-auto">
@@ -75,7 +72,6 @@ const AllSubscriptions = () => {
               <SubscriptionDetail
                 key="detail"
                 sub={selectedSub}
-                baseCurrency={baseCurrency}
                 onBack={() => setSelectedSub(null)}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -97,7 +93,7 @@ const AllSubscriptions = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
                   {subs.map((sub, i) => {
                     const Icon = iconMap[sub.icon || ""] || Bot;
-                    const converted = convertCurrency(sub.amount, sub.currency, baseCurrency);
+                    const amount = sub.amount;
                     return (
                       <motion.div
                         key={sub.id}
@@ -114,7 +110,7 @@ const AllSubscriptions = () => {
                           <div>
                             <p className="font-semibold text-foreground text-sm">{sub.platform}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              {currencySymbol(baseCurrency)}{converted.toFixed(2)}/mo
+                              {formatPound(amount)}/mo
                             </p>
                           </div>
                           <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${statusClasses[sub.status]}`}>
@@ -137,30 +133,26 @@ const AllSubscriptions = () => {
 
 function SubscriptionDetail({
   sub,
-  baseCurrency,
   onBack,
   onEdit,
   onDelete,
 }: {
   sub: Subscription;
-  baseCurrency: Currency;
   onBack: () => void;
   onEdit: (sub: Subscription) => void;
   onDelete: (id: string) => void;
 }) {
   const Icon = iconMap[sub.icon || ""] || Bot;
   const days = getDaysRemaining(sub.billing_day);
-  const converted = convertCurrency(sub.amount, sub.currency, baseCurrency);
 
   const details = [
-    { icon: CreditCard, label: "Amount", value: `${currencySymbol(baseCurrency)}${converted.toFixed(2)} / month` },
+    { icon: CreditCard, label: "Amount", value: `${formatPound(sub.amount)} / month` },
     { icon: Calendar, label: "Billing Day", value: `${sub.billing_day}th of every month` },
     { icon: Clock, label: "Days Until Renewal", value: sub.status === "active" ? `${days} days` : "—" },
     { icon: Tag, label: "Plan Type", value: sub.plan_type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase()) },
     { icon: CreditCard, label: "Payment Source", value: sub.payment_source },
     { icon: Calendar, label: "Subscription Date", value: new Date(sub.subscription_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) },
     { icon: Calendar, label: "Billing Cycle", value: sub.billing_cycle.charAt(0).toUpperCase() + sub.billing_cycle.slice(1) },
-    { icon: CreditCard, label: "Original Currency", value: `${currencySymbol(sub.currency)}${sub.amount.toFixed(2)} ${sub.currency}` },
   ];
 
   return (
