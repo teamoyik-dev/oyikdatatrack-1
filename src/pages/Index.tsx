@@ -26,20 +26,25 @@ import { toast } from "sonner";
 const Index = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [snapshots, setSnapshots] = useState<MonthlySnapshot[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editSub, setEditSub] = useState<Subscription | null>(null);
 
   useEffect(() => {
     async function init() {
-      const [s, sn] = await Promise.all([
-        fetchSubscriptions(),
-        fetchSnapshots()
-      ]);
-      setSubs(s);
-      setSnapshots(sn);
+      try {
+        const [s, sn] = await Promise.all([
+          fetchSubscriptions(),
+          fetchSnapshots()
+        ]);
+        setSubs(s);
+        setSnapshots(sn);
 
-      // Auto-capture previous month if missing
-      ensurePreviousMonthSnapshot(s);
+        // Auto-capture previous month if missing
+        ensurePreviousMonthSnapshot(s);
+      } finally {
+        setIsLoading(false);
+      }
     }
     init();
   }, []);
@@ -91,23 +96,38 @@ const Index = () => {
           onAddClick={() => { setEditSub(null); setModalOpen(true); }}
         />
         <main className="flex-1 p-6 space-y-6 overflow-y-auto">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Track and manage all your AI & SaaS subscriptions
-            </p>
-          </div>
-          <MetricCards
-            totalSpend={totalSpend}
-            activeCount={activeCount}
-            upcomingCount={upcomingCount}
-          />
-          <SpendChart data={getSpendTrend(subs, snapshots)} />
-          <SubscriptionsTable
-            subscriptions={subs}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          {isLoading ? (
+            <div className="space-y-6 animate-pulse">
+              <div className="h-8 w-48 bg-white/5 rounded-lg" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="h-32 bg-white/5 rounded-2xl" />
+                <div className="h-32 bg-white/5 rounded-2xl" />
+                <div className="h-32 bg-white/5 rounded-2xl" />
+              </div>
+              <div className="h-[300px] bg-white/5 rounded-2xl" />
+              <div className="h-64 bg-white/5 rounded-2xl" />
+            </div>
+          ) : (
+            <>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Track and manage all your AI & SaaS subscriptions
+                </p>
+              </div>
+              <MetricCards
+                totalSpend={totalSpend}
+                activeCount={activeCount}
+                upcomingCount={upcomingCount}
+              />
+              <SpendChart data={getSpendTrend(subs, snapshots)} />
+              <SubscriptionsTable
+                subscriptions={subs}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </>
+          )}
         </main>
       </div>
       <AddSubscriptionModal
