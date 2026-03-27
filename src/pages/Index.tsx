@@ -15,8 +15,8 @@ import {
   getSpendTrend,
   getUKNow,
 } from "@/lib/subscription-utils";
-import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { MetricCards } from "@/components/MetricCards";
 import { SpendChart } from "@/components/SpendChart";
 import { SubscriptionsTable } from "@/components/SubscriptionsTable";
@@ -89,46 +89,46 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <AppSidebar />
-      <div className="flex-1 ml-[240px] flex flex-col">
+    <DashboardLayout 
+      headerContent={
         <DashboardHeader
           onAddClick={() => { setEditSub(null); setModalOpen(true); }}
         />
-        <main className="flex-1 p-6 space-y-6 overflow-y-auto">
-          {isLoading ? (
-            <div className="space-y-6 animate-pulse">
-              <div className="h-8 w-48 bg-white/5 rounded-lg" />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="h-32 bg-white/5 rounded-2xl" />
-                <div className="h-32 bg-white/5 rounded-2xl" />
-                <div className="h-32 bg-white/5 rounded-2xl" />
-              </div>
-              <div className="h-[300px] bg-white/5 rounded-2xl" />
-              <div className="h-64 bg-white/5 rounded-2xl" />
+      }
+    >
+      <div className="space-y-6">
+        {isLoading ? (
+          <div className="space-y-6 animate-pulse">
+            <div className="h-8 w-48 bg-white/5 rounded-lg" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="h-32 bg-white/5 rounded-2xl" />
+              <div className="h-32 bg-white/5 rounded-2xl" />
+              <div className="h-32 bg-white/5 rounded-2xl" />
             </div>
-          ) : (
-            <>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Track and manage all your AI & SaaS subscriptions
-                </p>
-              </div>
-              <MetricCards
-                totalSpend={totalSpend}
-                activeCount={activeCount}
-                upcomingCount={upcomingCount}
-              />
-              <SpendChart data={getSpendTrend(subs, snapshots)} />
-              <SubscriptionsTable
-                subscriptions={subs}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            </>
-          )}
-        </main>
+            <div className="h-[300px] bg-white/5 rounded-2xl" />
+            <div className="h-64 bg-white/5 rounded-2xl" />
+          </div>
+        ) : (
+          <>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Track and manage all your AI & SaaS subscriptions
+              </p>
+            </div>
+            <MetricCards
+              totalSpend={totalSpend}
+              activeCount={activeCount}
+              upcomingCount={upcomingCount}
+            />
+            <SpendChart data={getSpendTrend(subs, snapshots)} />
+            <SubscriptionsTable
+              subscriptions={subs}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </>
+        )}
       </div>
       <AddSubscriptionModal
         open={modalOpen}
@@ -136,7 +136,7 @@ const Index = () => {
         onSubmit={handleAdd}
         editData={editSub}
       />
-    </div>
+    </DashboardLayout>
   );
 };
 

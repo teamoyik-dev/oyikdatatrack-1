@@ -7,8 +7,8 @@ import {
 import { Subscription } from "@/lib/types";
 import { fetchSubscriptions, createSubscription, deleteSubscription, updateSubscription } from "@/lib/subscription-api";
 import { getDaysRemaining, formatPound } from "@/lib/subscription-utils";
-import { AppSidebar } from "@/components/AppSidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { AddSubscriptionModal } from "@/components/AddSubscriptionModal";
 import { toast } from "sonner";
 
@@ -60,74 +60,75 @@ const AllSubscriptions = () => {
   const handleEdit = (sub: Subscription) => { setEditSub(sub); setModalOpen(true); };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <AppSidebar />
-      <div className="flex-1 ml-[240px] flex flex-col">
+    <DashboardLayout 
+      headerContent={
         <DashboardHeader
           onAddClick={() => { setEditSub(null); setModalOpen(true); }}
         />
-        <main className="flex-1 p-6 space-y-6 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            {selectedSub ? (
-              <SubscriptionDetail
-                key="detail"
-                sub={selectedSub}
-                onBack={() => setSelectedSub(null)}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ) : (
-              <motion.div
-                key="grid"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-2xl font-bold text-foreground">All Subscriptions</h1>
-                    <p className="text-sm text-muted-foreground mt-1">Click a platform to see details</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">{subs.length} total</span>
+      }
+    >
+      <div className="space-y-6">
+        <AnimatePresence mode="wait">
+          {selectedSub ? (
+            <SubscriptionDetail
+              key="detail"
+              sub={selectedSub}
+              onBack={() => setSelectedSub(null)}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-6"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">All Subscriptions</h1>
+                  <p className="text-sm text-muted-foreground mt-1">Click a platform to see details</p>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
-                  {subs.map((sub, i) => {
-                    const Icon = iconMap[sub.icon || ""] || Bot;
-                    const amount = sub.amount;
-                    return (
-                      <motion.div
-                        key={sub.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        onClick={() => setSelectedSub(sub)}
-                        className="glass-card p-5 cursor-pointer hover:border-primary/30 hover:bg-white/[0.04] transition-all group"
-                      >
-                        <div className="flex flex-col items-center text-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                            <Icon size={22} className="text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground text-sm">{sub.platform}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {formatPound(amount)}/mo
-                            </p>
-                          </div>
-                          <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${statusClasses[sub.status]}`}>
-                            {sub.status === "active" ? "Active" : "Canceled"}
-                          </span>
+                <span className="text-sm text-muted-foreground">{subs.length} total subscriptions</span>
+              </div>
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+                {subs.map((sub, i) => {
+                  const Icon = iconMap[sub.icon || ""] || Bot;
+                  const amount = sub.amount;
+                  return (
+                    <motion.div
+                      key={sub.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      onClick={() => setSelectedSub(sub)}
+                      className="glass-card p-5 cursor-pointer hover:border-primary/30 hover:bg-white/[0.04] transition-all group"
+                    >
+                      <div className="flex flex-col items-center text-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                          <Icon size={22} className="text-primary" />
                         </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">{sub.platform}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {formatPound(amount)}/mo
+                          </p>
+                        </div>
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium border ${statusClasses[sub.status]}`}>
+                          {sub.status === "active" ? "Active" : "Canceled"}
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <AddSubscriptionModal open={modalOpen} onClose={() => { setModalOpen(false); setEditSub(null); }} onSubmit={handleAdd} editData={editSub} />
-    </div>
+    </DashboardLayout>
   );
 };
 
