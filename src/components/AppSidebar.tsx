@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -25,6 +25,13 @@ interface AppSidebarProps {
 
 export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsLargeScreen(window.innerWidth >= 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const location = useLocation();
 
   return (
@@ -42,17 +49,18 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
         )}
       </AnimatePresence>
 
+      {/* Sidebar Container */}
       <motion.aside
         initial={false}
         animate={{ 
-          x: (typeof isOpen !== 'undefined') 
+          x: (typeof isOpen !== 'undefined' && !isLargeScreen) 
             ? (isOpen ? 0 : -280) // Mobile drawer positioning
             : 0, // Desktop fixed
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         className={`fixed inset-y-0 left-0 z-50 glass-card border-r border-whitebox shrink-0 flex flex-col transition-[width] duration-300 ${
           collapsed ? "w-[72px]" : "w-[240px]"
-        } ${typeof isOpen !== 'undefined' ? "lg:hidden shadow-2xl" : "hidden lg:flex"}`}
+        } ${typeof isOpen !== 'undefined' ? "lg:translate-x-0" : "hidden lg:flex"}`}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 h-20 border-b border-white/[0.06]">
@@ -64,23 +72,21 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
         </div>
 
         {/* Collapse toggle (Desktop only) */}
-        {typeof isOpen === 'undefined' && (
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-muted border border-white/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
-          >
-            <ChevronLeft
-              size={14}
-              className={`text-muted-foreground transition-transform ${collapsed ? "rotate-180" : ""}`}
-            />
-          </button>
-        )}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-muted border border-white/10 hidden lg:flex items-center justify-center hover:bg-primary/20 transition-colors z-50"
+        >
+          <ChevronLeft
+            size={14}
+            className={`text-muted-foreground transition-transform ${collapsed ? "rotate-180" : ""}`}
+          />
+        </button>
 
         {/* Nav Items */}
         <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
-            const showLabel = !collapsed || typeof isOpen !== 'undefined';
+            const showLabel = !collapsed || (typeof isOpen !== 'undefined' && !isLargeScreen);
             return (
               <Link
                 key={item.label}
@@ -102,15 +108,13 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
         <div className="px-3 pb-4">
           <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
             <HelpCircle size={20} className="shrink-0" />
-            {(!collapsed || typeof isOpen !== 'undefined') && <span>Help & Support</span>}
+            {(!collapsed || (typeof isOpen !== 'undefined' && !isLargeScreen)) && <span>Help & Support</span>}
           </button>
         </div>
       </motion.aside>
 
-      {/* Static Desktop Sidebar Placeholder - To prevent layout shift */}
-      {typeof isOpen === 'undefined' && (
-        <div className={`hidden lg:block shrink-0 transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"}`} />
-      )}
+      {/* Desktop Spacer to push content */}
+      <div className={`hidden lg:block shrink-0 transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"}`} />
     </>
   );
 }
