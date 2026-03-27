@@ -7,6 +7,7 @@ import { fetchSubscriptions } from "@/lib/subscription-api";
 import { getSpendTrend } from "@/lib/subscription-utils";
 import { QuickStats } from "@/components/QuickStats";
 import { fetchSnapshots, ensurePreviousMonthSnapshot } from "@/lib/snapshot-api";
+import { MonthlyHistory } from "@/components/MonthlyHistory";
 
 const Analytics = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
@@ -64,6 +65,10 @@ const Analytics = () => {
               <div>
                 <QuickStats subs={subs} />
               </div>
+            </div>
+
+            <div>
+              <MonthlyHistory snapshots={snapshots} />
             </div>
 
             <div className="glass-card rounded-xl p-6">
