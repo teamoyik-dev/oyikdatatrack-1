@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -18,67 +18,99 @@ const navItems = [
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
   return (
-    <motion.aside
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className={`fixed left-0 top-0 h-screen z-40 glass-card border-r border-white/[0.06] flex flex-col transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"
-        }`}
-    >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-20 border-b border-white/[0.06]">
-        <img
-          src={oyikLogo}
-          alt="Oyik.ai"
-          className={`transition-all duration-300 object-contain origin-left ${collapsed ? "w-8 h-8 object-left" : "w-36 h-auto max-h-12"}`}
-        />
-      </div>
+    <>
+      {/* Mobile Backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-muted border border-white/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+      <motion.aside
+        initial={false}
+        animate={{ 
+          x: (typeof isOpen !== 'undefined') 
+            ? (isOpen ? 0 : -280) // Mobile drawer positioning
+            : 0, // Desktop fixed
+        }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className={`fixed inset-y-0 left-0 z-50 glass-card border-r border-whitebox shrink-0 flex flex-col transition-[width] duration-300 ${
+          collapsed ? "w-[72px]" : "w-[240px]"
+        } ${typeof isOpen !== 'undefined' ? "lg:hidden shadow-2xl" : "hidden lg:flex"}`}
       >
-        <ChevronLeft
-          size={14}
-          className={`text-muted-foreground transition-transform ${collapsed ? "rotate-180" : ""}`}
-        />
-      </button>
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-5 h-20 border-b border-white/[0.06]">
+          <img
+            src={oyikLogo}
+            alt="Oyik.ai"
+            className={`transition-all duration-300 object-contain origin-left ${collapsed ? "w-8 h-8 object-left" : "w-36 h-auto max-h-12"}`}
+          />
+        </div>
 
-      {/* Nav Items */}
-      <nav className="flex-1 py-6 px-3 space-y-1">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.label}
-              to={item.path}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${isActive
-                ? "gradient-purple-blue text-primary-foreground glow-purple"
-                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                }`}
-            >
-              <item.icon size={20} className="shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
+        {/* Collapse toggle (Desktop only) */}
+        {typeof isOpen === 'undefined' && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-muted border border-white/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+          >
+            <ChevronLeft
+              size={14}
+              className={`text-muted-foreground transition-transform ${collapsed ? "rotate-180" : ""}`}
+            />
+          </button>
+        )}
 
+        {/* Nav Items */}
+        <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const showLabel = !collapsed || typeof isOpen !== 'undefined';
+            return (
+              <Link
+                key={item.label}
+                to={item.path}
+                onClick={onClose}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${isActive
+                  ? "gradient-purple-blue text-primary-foreground glow-purple"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                  }`}
+              >
+                <item.icon size={20} className="shrink-0" />
+                {showLabel && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
 
+        {/* Help */}
+        <div className="px-3 pb-4">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
+            <HelpCircle size={20} className="shrink-0" />
+            {(!collapsed || typeof isOpen !== 'undefined') && <span>Help & Support</span>}
+          </button>
+        </div>
+      </motion.aside>
 
-      {/* Help */}
-      <div className="px-3 pb-4">
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
-          <HelpCircle size={20} className="shrink-0" />
-          {!collapsed && <span>Help & Support</span>}
-        </button>
-      </div>
-    </motion.aside>
+      {/* Static Desktop Sidebar Placeholder - To prevent layout shift */}
+      {typeof isOpen === 'undefined' && (
+        <div className={`hidden lg:block shrink-0 transition-all duration-300 ${collapsed ? "w-[72px]" : "w-[240px]"}`} />
+      )}
+    </>
   );
 }

@@ -68,7 +68,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="relative w-full max-w-lg glass-card border border-white/10 p-6 rounded-2xl shadow-2xl"
+            className="relative w-[calc(100%-2rem)] max-w-lg glass-card border border-white/10 p-5 sm:p-6 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-foreground">
@@ -83,7 +83,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Platform Name</label>
                   <input
@@ -108,7 +108,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 <div>
                   <label className={labelClass}>Billing Cycle</label>
@@ -135,7 +135,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Status</label>
                   <select
