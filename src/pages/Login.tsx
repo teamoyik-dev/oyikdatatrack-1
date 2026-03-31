@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import oyikLogo from "@/assets/new-logo.png";
 
 const Login = () => {
-    const [userId, setUserId] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
@@ -19,14 +19,15 @@ const Login = () => {
         setError("");
         setIsLoading(true);
 
-        // Small delay for UX feel
-        await new Promise((r) => setTimeout(r, 600));
-
-        const success = login(userId, password);
-        if (success) {
+        const { error: loginError } = await login(email, password);
+        
+        if (!loginError) {
             navigate("/", { replace: true });
         } else {
-            setError("Invalid credentials. Please try again.");
+            setError(loginError.message === "Invalid login credentials" 
+                ? "Invalid email or password. Please try again." 
+                : loginError.message
+            );
             setIsLoading(false);
         }
     };
@@ -93,10 +94,10 @@ const Login = () => {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* User ID */}
+                        {/* Email Address */}
                         <div className="space-y-2">
                             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                User ID
+                                Email Address
                             </label>
                             <div className="relative">
                                 <User
@@ -104,10 +105,10 @@ const Login = () => {
                                     className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60"
                                 />
                                 <input
-                                    type="text"
-                                    value={userId}
-                                    onChange={(e) => setUserId(e.target.value)}
-                                    placeholder="Enter your user ID"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="Enter your email"
                                     required
                                     className="w-full h-12 pl-11 pr-4 rounded-xl bg-white/[0.04] border border-white/[0.08] text-foreground placeholder:text-muted-foreground/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all duration-200"
                                 />
