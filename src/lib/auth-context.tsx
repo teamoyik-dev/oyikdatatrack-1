@@ -1,44 +1,57 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "./supabase";
+import { Session, User } from "@supabase/supabase-js";
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    login: (userId: string, password: string) => boolean;
-    logout: () => void;
+    user: User | null;
+    isLoading: boolean;
+    login: (email: string, password: string) => Promise<{ error: any }>;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_USER = import.meta.env.VITE_ADMIN_USER;
-const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS;
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-        return sessionStorage.getItem("oyik_auth") === "true";
-    });
+    const [session, setSession] = useState<Session | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            sessionStorage.setItem("oyik_auth", "true");
-        } else {
-            sessionStorage.removeItem("oyik_auth");
-        }
-    }, [isAuthenticated]);
+        // Get initial session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setIsLoading(false);
+        });
 
-    const login = (userId: string, password: string): boolean => {
-        if (userId === ADMIN_USER && password === ADMIN_PASS) {
-            setIsAuthenticated(true);
-            return true;
-        }
-        return false;
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+            setIsLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const login = async (email: string, password: string) => {
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+        return { error };
     };
 
-    const logout = () => {
-        setIsAuthenticated(false);
-        sessionStorage.removeItem("oyik_auth");
+    const logout = async () => {
+        await supabase.auth.signOut();
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ 
+            isAuthenticated: !!session, 
+            user: session?.user ?? null,
+            isLoading,
+            login, 
+            logout 
+        }}>
             {children}
         </AuthContext.Provider>
     );
