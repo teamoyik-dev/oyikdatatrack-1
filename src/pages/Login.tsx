@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, User, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import oyikLogo from "@/assets/new-logo.png";
+import oyikLogo from "@/assets/logo-white.png";
 
 const Login = () => {
     const [email, setEmail] = useState("");

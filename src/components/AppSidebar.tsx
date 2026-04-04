@@ -9,7 +9,7 @@ import {
   HelpCircle,
   ChevronLeft,
 } from "lucide-react";
-import oyikLogo from "@/assets/new-logo.png";
+import oyikLogo from "@/assets/logo-white.png";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },

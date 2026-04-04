@@ -1,7 +1,7 @@
 import { useState, ReactNode } from "react";
 import { Menu, X } from "lucide-react";
 import { AppSidebar } from "./AppSidebar";
-import oyikLogo from "@/assets/new-logo.png";
+import oyikLogo from "@/assets/logo-white.png";
 
 interface DashboardLayoutProps {
   children: ReactNode;
