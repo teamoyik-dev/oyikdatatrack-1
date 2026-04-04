@@ -63,12 +63,17 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
         } ${typeof isOpen !== 'undefined' ? "lg:translate-x-0" : "hidden lg:flex"}`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 h-20 border-b border-white/[0.06]">
+        <div className="flex items-center gap-2 px-5 h-20 border-b border-white/[0.06] overflow-hidden">
           <img
             src={oyikLogo}
-            alt="Oyik.ai"
-            className={`transition-all duration-300 object-contain origin-left ${collapsed ? "w-8 h-8 object-left" : "w-36 h-auto max-h-12"}`}
+            alt="Logo"
+            className={`transition-all duration-300 object-contain shrink-0 ${collapsed ? "w-8 h-8" : "w-8 h-8"}`}
           />
+          {(!collapsed || (typeof isOpen !== 'undefined' && !isLargeScreen)) && (
+            <span className="text-xl font-bold text-foreground truncate tracking-tight">
+              oyik.ai
+            </span>
+          )}
         </div>
 
         {/* Collapse toggle (Desktop only) */}

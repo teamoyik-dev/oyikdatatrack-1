@@ -27,7 +27,10 @@ export function DashboardLayout({ children, headerContent }: DashboardLayoutProp
             >
               <Menu size={24} />
             </button>
-            <img src={oyikLogo} alt="Oyik.ai" className="h-8 w-auto" />
+            <img src={oyikLogo} alt="Logo" className="h-7 w-auto" />
+            <span className="text-lg font-bold text-foreground tracking-tight ml-2">
+              oyik.ai
+            </span>
           </div>
         </div>
 

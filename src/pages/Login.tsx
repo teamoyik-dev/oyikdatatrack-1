@@ -64,13 +64,16 @@ const Login = () => {
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: 0.2, duration: 0.5 }}
-                            className="flex justify-center mb-6"
+                            className="flex items-center justify-center gap-3 mb-6"
                         >
                             <img
                                 src={oyikLogo}
-                                alt="Oyik.ai"
-                                className="h-12 w-auto filter brightness-100"
+                                alt="Oyik logo"
+                                className="h-10 w-auto filter brightness-100"
                             />
+                             <span className="text-2xl font-bold text-foreground tracking-tight">
+                                oyik.ai
+                            </span>
                         </motion.div>
                         <h1 className="text-xl font-bold text-foreground mb-1">
                             Welcome back
