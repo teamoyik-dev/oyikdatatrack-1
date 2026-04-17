@@ -37,7 +37,38 @@ const Index = () => {
           fetchSubscriptions(),
           fetchSnapshots()
         ]);
-        setSubs(s);
+
+        // Auto-expire custom subscriptions whose end date has passed
+        const now = getUKNow();
+        const expiredCustom = s.filter(
+          (sub) =>
+            sub.billing_cycle === "custom" &&
+            sub.status === "active" &&
+            sub.custom_end_date &&
+            new Date(sub.custom_end_date) < now
+        );
+
+        if (expiredCustom.length > 0) {
+          await Promise.all(
+            expiredCustom.map((sub) =>
+              updateSubscription(sub.id, {
+                status: "canceled",
+                canceled_date: sub.custom_end_date,
+              })
+            )
+          );
+          // Update local state with canceled status
+          const expiredIds = new Set(expiredCustom.map((sub) => sub.id));
+          const updated = s.map((sub) =>
+            expiredIds.has(sub.id)
+              ? { ...sub, status: "canceled" as const, canceled_date: sub.custom_end_date }
+              : sub
+          );
+          setSubs(updated);
+        } else {
+          setSubs(s);
+        }
+
         setSnapshots(sn);
 
         // Auto-capture previous month if missing
