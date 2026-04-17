@@ -1,7 +1,7 @@
 
 export type SubscriptionStatus = "active" | "canceled";
 export type PlanType = "premium" | "trial" | "trial_finished" | "basic";
-export type BillingCycle = "monthly" | "yearly";
+export type BillingCycle = "monthly" | "yearly" | "custom";
 
 export interface Subscription {
   id: string;
@@ -17,6 +17,7 @@ export interface Subscription {
   created_at: string;
   canceled_date?: string | null;
   next_payment_date?: string | null;
+  custom_end_date?: string | null;
 }
 
 export interface SpendTrend {

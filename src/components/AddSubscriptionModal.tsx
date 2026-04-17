@@ -22,6 +22,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
     payment_source: data?.payment_source || "",
     subscription_date: data?.subscription_date || new Date().toISOString().slice(0, 10),
     next_payment_date: data?.next_payment_date || "",
+    custom_end_date: data?.custom_end_date || "",
   });
 
   const [form, setForm] = useState(getDefaultForm(editData));
@@ -39,12 +40,13 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
       amount: parseFloat(form.amount),
 
       billing_cycle: form.billing_cycle,
-      billing_day: parseInt(form.billing_day),
+      billing_day: form.billing_cycle === "custom" ? 0 : parseInt(form.billing_day),
       status: form.status,
       plan_type: form.plan_type,
       payment_source: form.payment_source,
       subscription_date: form.subscription_date,
       next_payment_date: form.next_payment_date || null,
+      custom_end_date: form.billing_cycle === "custom" ? (form.custom_end_date || null) : null,
       canceled_date: editData?.canceled_date || null,
     });
     onClose();
@@ -121,20 +123,34 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
                   >
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
+                    <option value="custom">Custom</option>
                   </select>
                 </div>
-                <div>
-                  <label className={labelClass}>Billing Day</label>
-                  <input
-                    className={inputClass}
-                    type="number"
-                    min="1"
-                    max="31"
-                    value={form.billing_day}
-                    onChange={(e) => setForm({ ...form, billing_day: e.target.value })}
-                    required
-                  />
-                </div>
+                {form.billing_cycle === "custom" ? (
+                  <div>
+                    <label className={labelClass}>Subscription End Date</label>
+                    <input
+                      className={inputClass}
+                      type="date"
+                      value={form.custom_end_date}
+                      onChange={(e) => setForm({ ...form, custom_end_date: e.target.value })}
+                      required
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className={labelClass}>Billing Day</label>
+                    <input
+                      className={inputClass}
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={form.billing_day}
+                      onChange={(e) => setForm({ ...form, billing_day: e.target.value })}
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

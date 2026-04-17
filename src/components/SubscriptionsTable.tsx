@@ -99,7 +99,11 @@ export function SubscriptionsTable({
                     {formatPound(converted)}
                   </td>
                   <td className="px-4 py-3.5 text-muted-foreground capitalize">
-                    {sub.billing_day}th of every month
+                    {sub.billing_cycle === "custom"
+                      ? (sub.custom_end_date
+                        ? `Ends ${new Date(sub.custom_end_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}`
+                        : "Custom")
+                      : `${sub.billing_day}th of every month`}
                   </td>
                   <td className="px-4 py-3.5">
                     <span
