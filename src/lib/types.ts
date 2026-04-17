@@ -16,6 +16,7 @@ export interface Subscription {
   payment_source: string;
   created_at: string;
   canceled_date?: string | null;
+  next_payment_date?: string | null;
 }
 
 export interface SpendTrend {

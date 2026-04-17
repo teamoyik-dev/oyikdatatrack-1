@@ -69,6 +69,7 @@ export function SubscriptionsTable({
               <th className="px-4 py-3 text-left font-medium">Amount</th>
               <th className="px-4 py-3 text-left font-medium">Billing Cycle</th>
               <th className="px-4 py-3 text-left font-medium">Days Left</th>
+              <th className="px-4 py-3 text-left font-medium">Next Payment</th>
               <th className="px-4 py-3 text-left font-medium">Status</th>
               <th className="px-4 py-3 text-left font-medium">Plan</th>
               <th className="px-4 py-3 text-left font-medium">Payment Source</th>
@@ -78,7 +79,7 @@ export function SubscriptionsTable({
           <tbody>
             {subscriptions.map((sub) => {
               const Icon = iconMap[sub.icon || ""] || Bot;
-              const days = getDaysRemaining(sub.billing_day);
+              const days = getDaysRemaining(sub.billing_day, sub.next_payment_date);
               const converted = sub.amount;
 
               return (
@@ -109,6 +110,11 @@ export function SubscriptionsTable({
                     >
                       {sub.status === "active" ? `${days} days` : "—"}
                     </span>
+                  </td>
+                  <td className="px-4 py-3.5 text-muted-foreground text-xs">
+                    {sub.next_payment_date
+                      ? new Date(sub.next_payment_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                      : "—"}
                   </td>
                   <td className="px-4 py-3.5">
                     <span

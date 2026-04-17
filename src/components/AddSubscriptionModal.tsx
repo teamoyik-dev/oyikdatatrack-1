@@ -21,6 +21,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
     plan_type: (data?.plan_type || "basic") as PlanType,
     payment_source: data?.payment_source || "",
     subscription_date: data?.subscription_date || new Date().toISOString().slice(0, 10),
+    next_payment_date: data?.next_payment_date || "",
   });
 
   const [form, setForm] = useState(getDefaultForm(editData));
@@ -43,6 +44,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
       plan_type: form.plan_type,
       payment_source: form.payment_source,
       subscription_date: form.subscription_date,
+      next_payment_date: form.next_payment_date || null,
       canceled_date: editData?.canceled_date || null,
     });
     onClose();
@@ -173,15 +175,26 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
                 />
               </div>
 
-              <div>
-                <label className={labelClass}>Subscription Start Date</label>
-                <input
-                  className={inputClass}
-                  type="date"
-                  value={form.subscription_date}
-                  onChange={(e) => setForm({ ...form, subscription_date: e.target.value })}
-                  required
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Subscription Start Date</label>
+                  <input
+                    className={inputClass}
+                    type="date"
+                    value={form.subscription_date}
+                    onChange={(e) => setForm({ ...form, subscription_date: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Next Payment Date <span className="text-muted-foreground/50">(optional)</span></label>
+                  <input
+                    className={inputClass}
+                    type="date"
+                    value={form.next_payment_date}
+                    onChange={(e) => setForm({ ...form, next_payment_date: e.target.value })}
+                  />
+                </div>
               </div>
 
               <button

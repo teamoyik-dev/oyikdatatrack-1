@@ -11,7 +11,13 @@ export function getNextBillingDate(billingDay: number): Date {
   return new Date(now.getFullYear(), now.getMonth() + 1, billingDay);
 }
 
-export function getDaysRemaining(billingDay: number): number {
+export function getDaysRemaining(billingDay: number, nextPaymentDate?: string | null): number {
+  if (nextPaymentDate) {
+    const next = new Date(nextPaymentDate);
+    const now = getUKNow();
+    const diff = next.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }
   const next = getNextBillingDate(billingDay);
   const now = getUKNow();
   const diff = next.getTime() - now.getTime();
@@ -41,7 +47,7 @@ export function getTrialCount(subs: Subscription[]): number {
 }
 
 export function getUpcomingPayments(subs: Subscription[]): number {
-  return subs.filter((s) => s.status === "active" && getDaysRemaining(s.billing_day) <= 7).length;
+  return subs.filter((s) => s.status === "active" && getDaysRemaining(s.billing_day, s.next_payment_date) <= 7).length;
 }
 
 export function formatPound(amount: number): string {
