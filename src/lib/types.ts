@@ -18,6 +18,7 @@ export interface Subscription {
   canceled_date?: string | null;
   next_payment_date?: string | null;
   custom_end_date?: string | null;
+  org_id?: string;
 }
 
 export interface SpendTrend {
@@ -32,4 +33,15 @@ export interface MonthlySnapshot {
   subscription_count: number;
   snapshot_data: any; // per-subscription breakdown
   created_at: string;
+  org_id?: string;
 }
+
+export type Organization = {
+  id: string;
+  name: string;
+  owner_id: string;
+  plan: 'free' | 'pro' | 'enterprise';
+  is_active: boolean;
+  currency: string;
+  created_at: string;
+};

@@ -8,30 +8,37 @@ import { getSpendTrend } from "@/lib/subscription-utils";
 import { QuickStats } from "@/components/QuickStats";
 import { fetchSnapshots, ensurePreviousMonthSnapshot } from "@/lib/snapshot-api";
 import { MonthlyHistory } from "@/components/MonthlyHistory";
+import { useAuth } from "@/lib/auth-context";
 
 const Analytics = () => {
+  const { org, orgLoading, loading } = useAuth();
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [snapshots, setSnapshots] = useState<MonthlySnapshot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function init() {
+      if (!org) return;
+      
       try {
         const [s, sn] = await Promise.all([
-          fetchSubscriptions(),
-          fetchSnapshots()
+          fetchSubscriptions(org.id),
+          fetchSnapshots(org.id)
         ]);
         setSubs(s);
         setSnapshots(sn);
 
         // Auto-capture previous month if missing
-        ensurePreviousMonthSnapshot(s);
+        ensurePreviousMonthSnapshot(s, org.id);
       } finally {
         setIsLoading(false);
       }
     }
-    init();
-  }, []);
+    
+    if (!orgLoading && org) {
+      init();
+    }
+  }, [org, orgLoading]);
 
   return (
     <DashboardLayout 
@@ -42,7 +49,7 @@ const Analytics = () => {
       }
     >
       <div className="space-y-6">
-        {isLoading ? (
+        {loading || orgLoading || isLoading || !org ? (
           <div className="space-y-6 animate-pulse">
             <div className="h-8 w-48 bg-white/5 rounded-lg" />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,66 +1,189 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "./supabase";
-import { Session, User } from "@supabase/supabase-js";
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { User } from '@supabase/supabase-js';
+import { supabase } from './supabase';
+import { Organization } from './types';
 
-interface AuthContextType {
-    isAuthenticated: boolean;
-    user: User | null;
-    isLoading: boolean;
-    login: (email: string, password: string) => Promise<{ error: any }>;
-    logout: () => Promise<void>;
-}
+type AuthContextType = {
+  user: User | null;
+  org: Organization | null;
+  loading: boolean;
+  orgLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, companyName: string, fullName: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  logout: () => Promise<void>;
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-    const [session, setSession] = useState<Session | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [org, setOrg] = useState<Organization | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [orgLoading, setOrgLoading] = useState(false);
+  const currentUserIdRef = useRef<string | null>(null);
 
-    useEffect(() => {
-        // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setIsLoading(false);
-        });
+  useEffect(() => {
+    let mounted = true;
 
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setIsLoading(false);
-        });
+    // Safety timeout: If auth takes longer than 3 seconds (e.g. Supabase lock deadlock during HMR),
+    // force loading to false so the app can recover and show the skeleton UI instead of a frozen spinner.
+    const fallbackTimeout = setTimeout(() => {
+      if (mounted) {
+        setLoading(false);
+      }
+    }, 3000);
 
-        return () => subscription.unsubscribe();
-    }, []);
-
-    const login = async (email: string, password: string) => {
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-        return { error };
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchOrg(session.user.id, false);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        if (mounted) setLoading(false);
+      }
     };
 
-    const logout = async () => {
-        await supabase.auth.signOut();
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+      
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        // If we already have the org for this exact user, no need to refetch and cause a skeleton loader flash!
+        if (currentUserIdRef.current === session.user.id) {
+          setLoading(false);
+          return;
+        }
+        await fetchOrg(session.user.id, false);
+      } else {
+        currentUserIdRef.current = null;
+        setOrg(null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      clearTimeout(fallbackTimeout);
+      subscription.unsubscribe();
     };
+  }, []);
 
-    return (
-        <AuthContext.Provider value={{ 
-            isAuthenticated: !!session, 
-            user: session?.user ?? null,
-            isLoading,
-            login, 
-            logout 
-        }}>
-            {children}
-        </AuthContext.Provider>
-    );
-}
-
-export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
+  const fetchOrg = async (userId: string, isFromLogin: boolean = false) => {
+    setOrgLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('owner_id', userId)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching org:', error);
+      }
+      
+      if (data) {
+        if (!data.is_active) {
+          await supabase.auth.signOut();
+          setUser(null);
+          setOrg(null);
+          currentUserIdRef.current = null;
+          const errorMsg = 'Your account has been suspended. Please contact support.';
+          if (isFromLogin) {
+            throw new Error(errorMsg);
+          } else {
+            console.error(errorMsg);
+          }
+          return;
+        }
+        currentUserIdRef.current = userId;
+        setOrg(data as Organization);
+      } else {
+        currentUserIdRef.current = null;
+        setOrg(null);
+      }
+    } finally {
+      setOrgLoading(false);
+      setLoading(false);
     }
-    return context;
-}
+  };
+
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    
+    if (data.user) {
+      await fetchOrg(data.user.id, true);
+    }
+  };
+
+  const signup = async (email: string, password: string, companyName: string, fullName: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          company_name: companyName,
+          full_name: fullName,
+        }
+      }
+    });
+    if (error) throw error;
+
+    if (data.user) {
+      const { error: orgError } = await supabase.from('organizations').insert({
+        name: companyName,
+        owner_id: data.user.id,
+        plan: 'free',
+        is_active: true,
+        currency: 'GBP'
+      });
+      if (orgError) {
+        console.error('Failed to create organization record:', orgError);
+      }
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setOrg(null);
+    currentUserIdRef.current = null;
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, org, loading, orgLoading, login, signup, resetPassword, updatePassword, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

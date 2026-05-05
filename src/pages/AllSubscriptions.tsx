@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bot, Workflow, Phone, MessageSquare, Globe, FileText, Brain, Palette, Database, Image,
@@ -33,17 +34,22 @@ const AllSubscriptions = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editSub, setEditSub] = useState<Subscription | null>(null);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
+  const { org, loading, orgLoading } = useAuth();
 
-  useEffect(() => { fetchSubscriptions().then(setSubs); }, []);
+  useEffect(() => {
+    if (org) {
+      fetchSubscriptions(org.id).then(setSubs);
+    }
+  }, [org]);
 
   const handleAdd = async (data: Omit<Subscription, "id" | "created_at">) => {
     if (editSub) {
-      const updated = await updateSubscription(editSub.id, data);
+      const updated = await updateSubscription(editSub.id, data, org!.id);
       setSubs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
       if (selectedSub?.id === updated.id) setSelectedSub(updated);
       toast.success("Subscription updated");
     } else {
-      const newSub = await createSubscription(data);
+      const newSub = await createSubscription(data, org!.id);
       setSubs((prev) => [...prev, newSub]);
       toast.success("Subscription added");
     }
@@ -51,7 +57,7 @@ const AllSubscriptions = () => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteSubscription(id);
+    await deleteSubscription(id, org!.id);
     setSubs((prev) => prev.filter((s) => s.id !== id));
     if (selectedSub?.id === id) setSelectedSub(null);
     toast.success("Subscription deleted");
@@ -68,8 +74,19 @@ const AllSubscriptions = () => {
       }
     >
       <div className="space-y-6">
-        <AnimatePresence mode="wait">
-          {selectedSub ? (
+        {loading || orgLoading || !org ? (
+          <div className="space-y-6 animate-pulse">
+            <div className="h-8 w-48 bg-white/5 rounded-lg" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+              <div className="h-40 bg-white/5 rounded-2xl" />
+              <div className="h-40 bg-white/5 rounded-2xl" />
+              <div className="h-40 bg-white/5 rounded-2xl" />
+              <div className="h-40 bg-white/5 rounded-2xl" />
+            </div>
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            {selectedSub ? (
             <SubscriptionDetail
               key="detail"
               sub={selectedSub}
@@ -126,6 +143,7 @@ const AllSubscriptions = () => {
             </motion.div>
           )}
         </AnimatePresence>
+        )}
       </div>
       <AddSubscriptionModal open={modalOpen} onClose={() => { setModalOpen(false); setEditSub(null); }} onSubmit={handleAdd} editData={editSub} />
     </DashboardLayout>
@@ -152,7 +170,7 @@ function SubscriptionDetail({
     { icon: Clock, label: "Days Until Renewal", value: sub.status === "active" ? `${days} days` : "—" },
     { icon: Tag, label: "Plan Type", value: sub.plan_type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase()) },
     { icon: CreditCard, label: "Payment Source", value: sub.payment_source },
-    { icon: Calendar, label: "Subscription Date", value: new Date(sub.subscription_date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) },
+    { icon: Calendar, label: "Subscription Date", value: new Date(sub.subscription_date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" }) },
     { icon: Calendar, label: "Billing Cycle", value: sub.billing_cycle.charAt(0).toUpperCase() + sub.billing_cycle.slice(1) },
   ];
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { Subscription, MonthlySnapshot } from "@/lib/types";
 import {
   fetchSubscriptions,
@@ -29,13 +30,15 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editSub, setEditSub] = useState<Subscription | null>(null);
+  const { org, orgLoading, loading } = useAuth();
 
   useEffect(() => {
+    if (!org) return;
     async function init() {
       try {
         const [s, sn] = await Promise.all([
-          fetchSubscriptions(),
-          fetchSnapshots()
+          fetchSubscriptions(org.id),
+          fetchSnapshots(org.id)
         ]);
 
         // Auto-expire custom subscriptions whose end date has passed
@@ -54,7 +57,7 @@ const Index = () => {
               updateSubscription(sub.id, {
                 status: "canceled",
                 canceled_date: sub.custom_end_date,
-              })
+              }, org.id)
             )
           );
           // Update local state with canceled status
@@ -72,13 +75,13 @@ const Index = () => {
         setSnapshots(sn);
 
         // Auto-capture previous month if missing
-        ensurePreviousMonthSnapshot(s);
+        ensurePreviousMonthSnapshot(s, org.id);
       } finally {
         setIsLoading(false);
       }
     }
     init();
-  }, []);
+  }, [org]);
 
   const totalSpend = formatPound(getTotalMonthlySpend(subs));
   const activeCount = getActiveCount(subs);
@@ -94,14 +97,14 @@ const Index = () => {
         payload.canceled_date = null;
       }
 
-      const updated = await updateSubscription(editSub.id, payload);
+      const updated = await updateSubscription(editSub.id, payload, org!.id);
       setSubs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
       toast.success("Subscription updated");
     } else {
       if (payload.status === "canceled") {
         payload.canceled_date = getUKNow().toISOString();
       }
-      const newSub = await createSubscription(payload);
+      const newSub = await createSubscription(payload, org!.id);
       setSubs((prev) => [...prev, newSub]);
       toast.success("Subscription added");
     }
@@ -109,7 +112,7 @@ const Index = () => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteSubscription(id);
+    await deleteSubscription(id, org!.id);
     setSubs((prev) => prev.filter((s) => s.id !== id));
     toast.success("Subscription deleted");
   };
@@ -128,7 +131,7 @@ const Index = () => {
       }
     >
       <div className="space-y-6">
-        {isLoading ? (
+        {loading || orgLoading || isLoading || !org ? (
           <div className="space-y-6 animate-pulse">
             <div className="h-8 w-48 bg-white/5 rounded-lg" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

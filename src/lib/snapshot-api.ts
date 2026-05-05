@@ -2,10 +2,11 @@ import { supabase } from "./supabase";
 import { MonthlySnapshot, Subscription } from "./types";
 import { getUKNow } from "./subscription-utils";
 
-export async function fetchSnapshots(): Promise<MonthlySnapshot[]> {
+export async function fetchSnapshots(orgId: string): Promise<MonthlySnapshot[]> {
     const { data, error } = await supabase
         .from("monthly_snapshots")
         .select("*")
+        .eq("org_id", orgId)
         .order("month", { ascending: true });
 
     if (error) {
@@ -17,11 +18,13 @@ export async function fetchSnapshots(): Promise<MonthlySnapshot[]> {
 }
 
 export async function createSnapshot(
-    snapshot: Omit<MonthlySnapshot, "id" | "created_at">
+    snapshot: Omit<MonthlySnapshot, "id" | "created_at">,
+    orgId: string
 ): Promise<MonthlySnapshot> {
+    const payload = { ...snapshot, org_id: orgId };
     const { data, error } = await supabase
         .from("monthly_snapshots")
-        .insert(snapshot)
+        .insert(payload)
         .select()
         .single();
 
@@ -37,17 +40,18 @@ export async function createSnapshot(
  * Checks if a snapshot exists for the previous month.
  * If not, calculates the spend for that month and creates a snapshot.
  */
-export async function ensurePreviousMonthSnapshot(subs: Subscription[]) {
+export async function ensurePreviousMonthSnapshot(subs: Subscription[], orgId: string) {
     const now = getUKNow();
     // Get the first day of the current month, then subtract one hour to get last month
     const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const monthKey = lastMonthDate.toISOString().substring(0, 7); // "YYYY-MM"
 
-    // 1. Check if snapshot already exists
+    // 1. Check if snapshot already exists for this org
     const { data: existing, error: checkError } = await supabase
         .from("monthly_snapshots")
         .select("id")
         .eq("month", monthKey)
+        .eq("org_id", orgId)
         .maybeSingle();
 
     if (checkError) {
@@ -92,7 +96,7 @@ export async function ensurePreviousMonthSnapshot(subs: Subscription[]) {
                 amount: s.amount,
                 billing_cycle: s.billing_cycle
             }))
-        });
+        }, orgId);
         console.log(`✅ Snapshot captured for ${monthKey}`);
     } catch (err) {
         console.error(`Failed to capture snapshot for ${monthKey}:`, err);

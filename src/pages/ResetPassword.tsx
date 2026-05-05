@@ -1,31 +1,38 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import logoWhite from '../assets/logo-white.png';
-import { User, Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
+const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { updatePassword } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await updatePassword(password);
+      toast.success('Password updated successfully!');
       navigate('/');
     } catch (err: any) {
-      console.error('Login error:', err);
-      setError(err.message || 'Failed to log in. Please check your credentials.');
+      console.error('Password update error:', err);
+      setError(err.message || 'Failed to update password. Your reset link may have expired.');
     } finally {
       setIsLoading(false);
     }
@@ -43,40 +50,17 @@ const Login: React.FC = () => {
             <img src={logoWhite} alt="Oyik logo" className="h-8 opacity-90" />
             <span className="text-white font-bold text-2xl tracking-tight">oyik.ai</span>
           </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Welcome back</h1>
-          <p className="text-[#8b949e] text-sm mt-1">Sign in to access your dashboard</p>
+          <h1 className="text-xl font-bold text-white tracking-tight">Create New Password</h1>
+          <p className="text-[#8b949e] text-sm mt-1 text-center">
+            Please enter your new password below.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-[10px] font-semibold text-[#8b949e] uppercase tracking-widest">
-              Email Address
+            <label htmlFor="password" className="text-[10px] font-semibold text-[#8b949e] uppercase tracking-widest">
+              New Password
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <User className="h-4 w-4 text-slate-400" />
-              </div>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-10 bg-[#f6f8fa] hover:bg-white focus:bg-white text-slate-900 border-transparent focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg transition-colors font-medium text-sm"
-                placeholder="Enter email"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <label htmlFor="password" className="text-[10px] font-semibold text-[#8b949e] uppercase tracking-widest">
-                Password
-              </label>
-              <Link to="/forgot-password" className="text-[11px] font-medium text-[#5c98ff] hover:text-[#7baaff] transition-colors">
-                Forgot password?
-              </Link>
-            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                 <Lock className="h-4 w-4 text-slate-400" />
@@ -88,12 +72,13 @@ const Login: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10 pr-10 h-10 bg-[#f6f8fa] hover:bg-white focus:bg-white text-slate-900 border-transparent focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg transition-colors font-medium text-sm tracking-widest placeholder:tracking-normal"
-                placeholder="Enter password"
+                placeholder="Enter new password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -106,7 +91,7 @@ const Login: React.FC = () => {
               className="w-full h-10 bg-gradient-to-b from-[#5c98ff] to-[#3B82F6] hover:from-[#4a8bff] hover:to-[#2563EB] text-white font-medium rounded-lg shadow-[0_4px_14px_0_rgba(59,130,246,0.39)] transition-all duration-300 text-sm border border-[#5c98ff]/50"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? 'Updating...' : 'Update Password'}
             </Button>
           </div>
         </form>
@@ -116,20 +101,9 @@ const Login: React.FC = () => {
             {error}
           </div>
         )}
-
-        <div className="mt-8 text-center text-[11px] text-[#8b949e]">
-          Protected dashboard · Oyik.ai
-        </div>
-      </div>
-      
-      <div className="mt-8 text-center text-sm text-[#8b949e] relative z-10">
-        Don't have an account?{' '}
-        <Link to="/signup" className="text-[#5c98ff] hover:text-[#7baaff] font-medium transition-colors">
-          Sign up
-        </Link>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default ResetPassword;
