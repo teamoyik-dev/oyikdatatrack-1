@@ -157,6 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error: orgError } = await supabase.from('organizations').insert({
         name: companyName,
         owner_id: data.user.id,
+        owner_email: email,
         plan: 'free',
         is_active: true,
         currency: 'GBP'

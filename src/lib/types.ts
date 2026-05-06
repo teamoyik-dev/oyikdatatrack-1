@@ -40,6 +40,7 @@ export type Organization = {
   id: string;
   name: string;
   owner_id: string;
+  owner_email?: string;
   plan: 'free' | 'pro' | 'enterprise';
   is_active: boolean;
   currency: string;
