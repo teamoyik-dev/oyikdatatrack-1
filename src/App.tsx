@@ -15,6 +15,13 @@ import Settings from "./pages/Settings.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { AdminAuthProvider } from "./lib/admin-auth-context.tsx";
+import AdminLogin from "./pages/admin/AdminLogin.tsx";
+import AdminGuard from "./components/AdminGuard.tsx";
+import AdminLayout from "./components/AdminLayout.tsx";
+import AdminOverview from "./pages/admin/AdminOverview.tsx";
+import AdminClients from "./pages/admin/AdminClients.tsx";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions.tsx";
 
 const queryClient = new QueryClient();
 
@@ -23,25 +30,39 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/check-email" element={<CheckEmail />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/subscriptions" element={<AllSubscriptions />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/settings" element={<Settings />} />
-            </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <AdminAuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/check-email" element={<CheckEmail />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route element={<AdminGuard />}>
+                <Route element={<AdminLayout />}>
+                  <Route path="/admin" element={<AdminOverview />} />
+                  <Route path="/admin/clients" element={<AdminClients />} />
+                  <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+                </Route>
+              </Route>
+
+              {/* Protected Client Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/subscriptions" element={<AllSubscriptions />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AdminAuthProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
