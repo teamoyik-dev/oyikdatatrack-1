@@ -37,7 +37,7 @@ const Signup: React.FC = () => {
 
     try {
       await signup(email, password, companyName, fullName);
-      navigate('/check-email');
+      navigate('/');
     } catch (err: any) {
       console.error('Signup error:', err);
       setError(err.message || 'Failed to create an account. Please try again.');
