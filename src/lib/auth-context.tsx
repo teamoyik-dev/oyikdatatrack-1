@@ -54,8 +54,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
+      
+      if (event === 'INITIAL_SESSION') {
+        // Handled by checkSession to ensure token is fully ready and avoid race conditions
+        return;
+      }
       
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -82,11 +87,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchOrg = async (userId: string, isFromLogin: boolean = false) => {
     setOrgLoading(true);
     try {
-      const { data, error } = await supabase
+      const queryPromise = supabase
         .from('organizations')
         .select('*')
         .eq('owner_id', userId)
         .single();
+        
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Auth Timeout')), 5000);
+      });
+      
+      const response = await Promise.race([queryPromise, timeoutPromise]) as any;
+      const { data, error } = response;
         
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching org:', error);
@@ -101,8 +113,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const errorMsg = 'Your account has been suspended. Please contact support.';
           if (isFromLogin) {
             throw new Error(errorMsg);
-          } else {
-            console.error(errorMsg);
           }
           return;
         }
@@ -112,6 +122,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentUserIdRef.current = null;
         setOrg(null);
       }
+    } catch (err) {
+      // Silently handle timeouts/errors to allow other triggers to take over
+      console.error('Organization fetch error:', err);
     } finally {
       setOrgLoading(false);
       setLoading(false);
