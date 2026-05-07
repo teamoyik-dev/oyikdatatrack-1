@@ -149,7 +149,7 @@ const AdminSubscriptions: React.FC = () => {
             placeholder="Search platform or client..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-10 bg-background border-white/10 text-white focus-visible:ring-1 focus-visible:ring-rose-500"
+            className="pl-9 h-10 bg-background border-white/10 text-white focus-visible:ring-1 focus-visible:ring-blue-500"
           />
         </div>
         
@@ -251,7 +251,7 @@ const AdminSubscriptions: React.FC = () => {
                           <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${
                             sub.status === 'active' 
                               ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                              : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                           }`}>
                             {sub.status === 'active' ? 'Active' : 'Canceled'}
                           </span>

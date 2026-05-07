@@ -217,7 +217,7 @@ const AdminClients: React.FC = () => {
             placeholder="Search by company name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-10 bg-[#161b22] border-white/10 text-white placeholder:text-[#8b949e] focus-visible:ring-1 focus-visible:ring-rose-500"
+            className="pl-9 h-10 bg-[#161b22] border-white/10 text-white placeholder:text-[#8b949e] focus-visible:ring-1 focus-visible:ring-blue-500"
           />
         </div>
       </div>
@@ -276,7 +276,7 @@ const AdminClients: React.FC = () => {
                       <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${
                         org.is_active 
                           ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                          : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                          : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                       }`}>
                         {org.is_active ? 'Active' : 'Suspended'}
                       </span>
@@ -334,7 +334,7 @@ const AdminClients: React.FC = () => {
                           <DropdownMenuSeparator className="bg-white/10" />
                           
                           <DropdownMenuItem 
-                            className="cursor-pointer text-rose-400 hover:bg-rose-500/10 focus:text-rose-400 focus:bg-rose-500/10"
+                            className="cursor-pointer text-blue-400 hover:bg-blue-500/10 focus:text-blue-400 focus:bg-blue-500/10"
                             onClick={() => openDeleteModal(org)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -359,7 +359,7 @@ const AdminClients: React.FC = () => {
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto mt-4">
             {isSubsLoading ? (
-              <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div></div>
+              <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>
             ) : subsData.length === 0 ? (
               <p className="text-center text-[#8b949e] py-8">No subscriptions found for this client.</p>
             ) : (
@@ -378,7 +378,7 @@ const AdminClients: React.FC = () => {
                       <td className="py-3">
                         <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded ${
                           sub.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 
-                          sub.status === 'canceled' ? 'bg-rose-500/10 text-rose-400' : 
+                          sub.status === 'canceled' ? 'bg-blue-500/10 text-blue-400' : 
                           'bg-amber-500/10 text-amber-400'
                         }`}>
                           {sub.status}
@@ -414,7 +414,7 @@ const AdminClients: React.FC = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsPlanOpen(false)} className="border-white/10 text-white hover:bg-white/5">Cancel</Button>
-            <Button onClick={handleUpdatePlan} disabled={isPlanUpdating || selectedPlan === selectedOrg?.plan} className="bg-rose-600 hover:bg-rose-700 text-white">
+            <Button onClick={handleUpdatePlan} disabled={isPlanUpdating || selectedPlan === selectedOrg?.plan} className="bg-blue-600 hover:bg-blue-700 text-white">
               {isPlanUpdating ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
@@ -425,7 +425,7 @@ const AdminClients: React.FC = () => {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="bg-[#161b22] border-white/10 text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-rose-500">Delete Organization</AlertDialogTitle>
+            <AlertDialogTitle className="text-blue-500">Delete Organization</AlertDialogTitle>
             <AlertDialogDescription className="text-[#8b949e]">
               This action cannot be undone. This will permanently delete 
               <span className="font-bold text-white mx-1">{selectedOrg?.name}</span> 
@@ -440,7 +440,7 @@ const AdminClients: React.FC = () => {
             <Input
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
-              className="bg-background border-rose-500/30 focus-visible:ring-rose-500"
+              className="bg-background border-blue-500/30 focus-visible:ring-blue-500"
               placeholder={selectedOrg?.name}
             />
           </div>
@@ -451,7 +451,7 @@ const AdminClients: React.FC = () => {
               variant="destructive" 
               onClick={handleDelete}
               disabled={isDeleting || deleteConfirmText !== selectedOrg?.name}
-              className="bg-rose-600 hover:bg-rose-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isDeleting ? 'Deleting...' : 'Permanently Delete'}
             </Button>

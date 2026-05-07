@@ -36,7 +36,7 @@ const AdminLogin: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background relative overflow-hidden font-sans p-4">
       {/* Subtle top-left glow - matching the main login but maybe a different color (amber/red) */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] bg-rose-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-[400px] bg-[#161b22] rounded-[20px] shadow-2xl border border-white/5 p-8 relative z-10">
         
@@ -45,7 +45,7 @@ const AdminLogin: React.FC = () => {
             <img src={logoWhite} alt="Oyik logo" className="h-8 opacity-90" />
             <span className="text-white font-bold text-2xl tracking-tight">oyik.ai</span>
           </div>
-          <div className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-widest mb-4">
+          <div className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-4">
             Admin Panel
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Super Admin Access</h1>
@@ -103,7 +103,7 @@ const AdminLogin: React.FC = () => {
           <div className="pt-2">
             <Button
               type="submit"
-              className="w-full h-10 bg-gradient-to-b from-rose-500 to-rose-600 hover:from-rose-400 hover:to-rose-500 text-white font-medium rounded-lg shadow-[0_4px_14px_0_rgba(225,29,72,0.39)] transition-all duration-300 text-sm border border-rose-500/50"
+              className="w-full h-10 bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-medium rounded-lg shadow-[0_4px_14px_0_rgba(59,130,246,0.39)] transition-all duration-300 text-sm border border-blue-500/50"
               disabled={isLoading}
             >
               {isLoading ? 'Authenticating...' : 'Sign in to Admin'}

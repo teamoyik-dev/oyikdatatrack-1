@@ -128,9 +128,9 @@ const AdminOverview: React.FC = () => {
         </div>
 
         {/* Suspended Clients */}
-        <div className="bg-[#161b22] border border-white/5 rounded-xl p-6 flex flex-col justify-between group hover:border-rose-500/30 transition-colors">
+        <div className="bg-[#161b22] border border-white/5 rounded-xl p-6 flex flex-col justify-between group hover:border-blue-500/30 transition-colors">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-2.5 rounded-lg bg-rose-500/10 text-rose-400 group-hover:bg-rose-500/20 transition-colors">
+            <div className="p-2.5 rounded-lg bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
               <XCircle size={24} />
             </div>
           </div>
@@ -205,7 +205,7 @@ const AdminOverview: React.FC = () => {
                       <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${
                         org.is_active 
                           ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                          : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                          : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                       }`}>
                         {org.is_active ? 'Active' : 'Suspended'}
                       </span>
@@ -230,7 +230,7 @@ const AdminOverview: React.FC = () => {
                           className={`h-8 w-8 p-0 ${
                             org.is_active 
                               ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10' 
-                              : 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/10'
+                              : 'text-blue-400 hover:text-blue-300 hover:bg-blue-500/10'
                           }`}
                           onClick={() => handleToggleStatus(org)}
                           disabled={actionLoadingId === org.id}

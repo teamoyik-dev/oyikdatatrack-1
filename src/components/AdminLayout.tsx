@@ -44,7 +44,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
           x: 0,
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className={`fixed inset-y-0 left-0 z-50 bg-[#161b22] border-r border-rose-500/20 border-t-4 border-t-rose-500 shrink-0 flex flex-col transition-[width] duration-300 ${
+        className={`fixed inset-y-0 left-0 z-50 bg-[#161b22] border-r border-blue-500/20 border-t-4 border-t-blue-500 shrink-0 flex flex-col transition-[width] duration-300 ${
           collapsed ? "w-[72px]" : "w-[240px]"
         }`}
       >
@@ -63,7 +63,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
             )}
           </div>
           {!collapsed && (
-            <div className="mt-1.5 px-1.5 py-0.5 w-max rounded bg-rose-500/20 text-rose-400 text-[9px] font-bold uppercase tracking-widest">
+            <div className="mt-1.5 px-1.5 py-0.5 w-max rounded bg-blue-500/20 text-blue-400 text-[9px] font-bold uppercase tracking-widest">
               Admin Panel
             </div>
           )}
@@ -72,11 +72,11 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
         {/* Collapse toggle (Desktop only) */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-24 w-6 h-6 rounded-full bg-[#161b22] border border-rose-500/20 hidden lg:flex items-center justify-center hover:bg-rose-500/20 transition-colors z-50"
+          className="absolute -right-3 top-24 w-6 h-6 rounded-full bg-[#161b22] border border-blue-500/20 hidden lg:flex items-center justify-center hover:bg-blue-500/20 transition-colors z-50"
         >
           <ChevronLeft
             size={14}
-            className={`text-rose-400 transition-transform ${collapsed ? "rotate-180" : ""}`}
+            className={`text-blue-400 transition-transform ${collapsed ? "rotate-180" : ""}`}
           />
         </button>
 
@@ -90,7 +90,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
                 to={item.path}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                   isActive
-                    ? "bg-gradient-to-r from-rose-500/20 to-transparent text-rose-400 border-l-2 border-rose-500"
+                    ? "bg-gradient-to-r from-blue-500/20 to-transparent text-blue-400 border-l-2 border-blue-500"
                     : "text-muted-foreground hover:text-white hover:bg-white/5 border-l-2 border-transparent"
                 }`}
               >
@@ -105,7 +105,7 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
         <div className="px-3 pb-4 border-t border-white/[0.06] pt-4">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-colors"
           >
             <LogOut size={20} className="shrink-0" />
             {!collapsed && <span>Sign Out</span>}
