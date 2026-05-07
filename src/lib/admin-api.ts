@@ -31,6 +31,19 @@ export async function fetchOrgSubscriptions(orgId: string): Promise<any[]> {
   return data;
 }
 
+export async function fetchAllSubscriptionsWithOrgs(): Promise<any[]> {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*, organizations(*)')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch subscriptions with orgs: ${error.message}`);
+  }
+
+  return data;
+}
+
 export async function suspendOrg(orgId: string): Promise<void> {
   const { error } = await supabase
     .from('organizations')
