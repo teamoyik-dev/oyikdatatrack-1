@@ -70,8 +70,10 @@ const AdminClients: React.FC = () => {
 
   // Delete state
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Suspend state
+  const [isSuspendOpen, setIsSuspendOpen] = useState(false);
 
   // General action loading state for suspend/activate
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
@@ -157,8 +159,12 @@ const AdminClients: React.FC = () => {
 
   const openDeleteModal = (org: OrgWithStats) => {
     setSelectedOrg(org);
-    setDeleteConfirmText('');
     setIsDeleteOpen(true);
+  };
+
+  const openSuspendModal = (org: OrgWithStats) => {
+    setSelectedOrg(org);
+    setIsSuspendOpen(true);
   };
 
   const handleDelete = async () => {
@@ -310,11 +316,7 @@ const AdminClients: React.FC = () => {
                           {org.is_active ? (
                             <DropdownMenuItem 
                               className="cursor-pointer text-amber-400 hover:bg-amber-500/10 focus:text-amber-400 focus:bg-amber-500/10"
-                              onClick={() => {
-                                if (window.confirm(`Are you sure you want to suspend ${org.name}? They will lose access immediately.`)) {
-                                  handleToggleStatus(org);
-                                }
-                              }}
+                              onClick={() => openSuspendModal(org)}
                               disabled={isActionLoading === org.id}
                             >
                               <PowerOff className="mr-2 h-4 w-4" />
@@ -421,39 +423,54 @@ const AdminClients: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Modal */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="bg-[#161b22] border-white/10 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-blue-500">Delete Organization</AlertDialogTitle>
             <AlertDialogDescription className="text-[#8b949e]">
-              This action cannot be undone. This will permanently delete 
-              <span className="font-bold text-white mx-1">{selectedOrg?.name}</span> 
-              and remove all of their data, subscriptions, and billing history from our servers.
+              Are you sure you want to permanently delete <span className="font-bold text-white mx-1">{selectedOrg?.name}</span>? 
+              This will remove all of their data, subscriptions, and billing history from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           
-          <div className="my-4 space-y-2">
-            <label className="text-sm font-medium text-white">
-              Please type <span className="font-bold font-mono bg-white/10 px-1 py-0.5 rounded select-all">{selectedOrg?.name}</span> to confirm.
-            </label>
-            <Input
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              className="bg-background border-blue-500/30 focus-visible:ring-blue-500"
-              placeholder={selectedOrg?.name}
-            />
-          </div>
-
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-white/10 text-white hover:bg-white/5 mt-0">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-white/10 text-white hover:bg-white/5 mt-0">No</AlertDialogCancel>
             <Button 
               variant="destructive" 
               onClick={handleDelete}
-              disabled={isDeleting || deleteConfirmText !== selectedOrg?.name}
+              disabled={isDeleting}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {isDeleting ? 'Deleting...' : 'Permanently Delete'}
+              {isDeleting ? 'Deleting...' : 'Yes'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Suspend Confirmation Modal */}
+      <AlertDialog open={isSuspendOpen} onOpenChange={setIsSuspendOpen}>
+        <AlertDialogContent className="bg-[#161b22] border-white/10 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-amber-500">Suspend Organization</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#8b949e]">
+              Are you sure you want to suspend <span className="font-bold text-white mx-1">{selectedOrg?.name}</span>? 
+              They will lose access to the dashboard immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-white/10 text-white hover:bg-white/5 mt-0">No</AlertDialogCancel>
+            <Button 
+              onClick={() => {
+                if (selectedOrg) {
+                  handleToggleStatus(selectedOrg);
+                  setIsSuspendOpen(false);
+                }
+              }}
+              disabled={isActionLoading === selectedOrg?.id}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {isActionLoading === selectedOrg?.id ? 'Suspending...' : 'Yes'}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

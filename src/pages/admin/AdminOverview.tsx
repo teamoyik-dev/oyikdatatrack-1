@@ -12,6 +12,15 @@ import {
 import { fetchAdminStats, fetchAllOrgs, suspendOrg, activateOrg } from '../../lib/admin-api';
 import { AdminStats, OrgWithStats } from '../../lib/admin-types';
 import { Button } from '../../components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
 import { toast } from 'sonner';
 
 const AdminOverview: React.FC = () => {
@@ -19,6 +28,11 @@ const AdminOverview: React.FC = () => {
   const [recentOrgs, setRecentOrgs] = useState<OrgWithStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  
+  // Suspend modal state
+  const [selectedOrg, setSelectedOrg] = useState<OrgWithStats | null>(null);
+  const [isSuspendOpen, setIsSuspendOpen] = useState(false);
+  
   const navigate = useNavigate();
 
   const loadData = async () => {
@@ -232,7 +246,14 @@ const AdminOverview: React.FC = () => {
                               ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10' 
                               : 'text-blue-400 hover:text-blue-300 hover:bg-blue-500/10'
                           }`}
-                          onClick={() => handleToggleStatus(org)}
+                          onClick={() => {
+                            if (org.is_active) {
+                              setSelectedOrg(org);
+                              setIsSuspendOpen(true);
+                            } else {
+                              handleToggleStatus(org);
+                            }
+                          }}
                           disabled={actionLoadingId === org.id}
                           title={org.is_active ? "Suspend Client" : "Activate Client"}
                         >
@@ -247,6 +268,35 @@ const AdminOverview: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Suspend Confirmation Modal */}
+      <AlertDialog open={isSuspendOpen} onOpenChange={setIsSuspendOpen}>
+        <AlertDialogContent className="bg-[#161b22] border-white/10 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-amber-500">Suspend Organization</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#8b949e]">
+              Are you sure you want to suspend <span className="font-bold text-white mx-1">{selectedOrg?.name}</span>? 
+              They will lose access to the dashboard immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-white/10 text-white hover:bg-white/5 mt-0">No</AlertDialogCancel>
+            <Button 
+              onClick={() => {
+                if (selectedOrg) {
+                  handleToggleStatus(selectedOrg);
+                  setIsSuspendOpen(false);
+                }
+              }}
+              disabled={actionLoadingId === selectedOrg?.id}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {actionLoadingId === selectedOrg?.id ? 'Suspending...' : 'Yes'}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
