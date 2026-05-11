@@ -14,7 +14,6 @@ import { useAdminAuth } from "@/lib/admin-auth-context";
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/admin" },
   { icon: Building2, label: "Clients", path: "/admin/clients" },
-  { icon: CreditCard, label: "Subscriptions", path: "/admin/subscriptions" },
 ];
 
 const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {

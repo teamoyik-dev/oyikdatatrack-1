@@ -58,11 +58,6 @@ const AdminClients: React.FC = () => {
   // Modals state
   const [selectedOrg, setSelectedOrg] = useState<OrgWithStats | null>(null);
   
-  // View Subs state
-  const [isSubsOpen, setIsSubsOpen] = useState(false);
-  const [subsData, setSubsData] = useState<any[]>([]);
-  const [isSubsLoading, setIsSubsLoading] = useState(false);
-
   // Change Plan state
   const [isPlanOpen, setIsPlanOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
@@ -115,20 +110,6 @@ const AdminClients: React.FC = () => {
       toast.error(err.message || 'Failed to update status');
     } finally {
       setIsActionLoading(null);
-    }
-  };
-
-  const openSubsModal = async (org: OrgWithStats) => {
-    setSelectedOrg(org);
-    setIsSubsOpen(true);
-    setIsSubsLoading(true);
-    try {
-      const subs = await fetchOrgSubscriptions(org.id);
-      setSubsData(subs);
-    } catch (err: any) {
-      toast.error('Failed to load subscriptions');
-    } finally {
-      setIsSubsLoading(false);
     }
   };
 
@@ -302,10 +283,6 @@ const AdminClients: React.FC = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-[#161b22] border-white/10 text-white">
-                          <DropdownMenuItem className="cursor-pointer hover:bg-white/10" onClick={() => openSubsModal(org)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Subscriptions
-                          </DropdownMenuItem>
                           <DropdownMenuItem className="cursor-pointer hover:bg-white/10" onClick={() => openPlanModal(org)}>
                             <Settings className="mr-2 h-4 w-4" />
                             Change Plan
@@ -352,49 +329,6 @@ const AdminClients: React.FC = () => {
           </table>
         </div>
       </div>
-
-      {/* Subscriptions Modal */}
-      <Dialog open={isSubsOpen} onOpenChange={setIsSubsOpen}>
-        <DialogContent className="bg-[#161b22] border-white/10 text-white max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Subscriptions for {selectedOrg?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto mt-4">
-            {isSubsLoading ? (
-              <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>
-            ) : subsData.length === 0 ? (
-              <p className="text-center text-[#8b949e] py-8">No subscriptions found for this client.</p>
-            ) : (
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-[#8b949e] uppercase border-b border-white/10">
-                  <tr>
-                    <th className="pb-3 font-medium">Platform</th>
-                    <th className="pb-3 font-medium">Status</th>
-                    <th className="pb-3 font-medium text-right">Cost</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {subsData.map(sub => (
-                    <tr key={sub.id}>
-                      <td className="py-3 font-medium">{sub.platform}</td>
-                      <td className="py-3">
-                        <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded ${
-                          sub.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 
-                          sub.status === 'canceled' ? 'bg-blue-500/10 text-blue-400' : 
-                          'bg-amber-500/10 text-amber-400'
-                        }`}>
-                          {sub.status}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right">{selectedOrg?.currency === 'usd' ? '$' : '£'}{sub.amount}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Change Plan Modal */}
       <Dialog open={isPlanOpen} onOpenChange={setIsPlanOpen}>

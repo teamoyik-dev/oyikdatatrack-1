@@ -21,7 +21,6 @@ import AdminGuard from "./components/AdminGuard.tsx";
 import AdminLayout from "./components/AdminLayout.tsx";
 import AdminOverview from "./pages/admin/AdminOverview.tsx";
 import AdminClients from "./pages/admin/AdminClients.tsx";
-import AdminSubscriptions from "./pages/admin/AdminSubscriptions.tsx";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +45,6 @@ const App = () => (
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminOverview />} />
                   <Route path="/admin/clients" element={<AdminClients />} />
-                  <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 </Route>
               </Route>
 
