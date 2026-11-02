@@ -1,16 +1,25 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { Subscription, BillingCycle, SubscriptionStatus, PlanType } from "@/lib/types";
+import { Subscription, BillingCycle, SubscriptionStatus, PlanType, Company } from "@/lib/types";
 
 interface AddSubscriptionModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: Omit<Subscription, "id" | "created_at">) => void;
   editData?: Subscription | null;
+  companies?: Company[];
+  defaultCompanyId?: string | null;
 }
 
-export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddSubscriptionModalProps) {
+export function AddSubscriptionModal({
+  open,
+  onClose,
+  onSubmit,
+  editData,
+  companies = [],
+  defaultCompanyId,
+}: AddSubscriptionModalProps) {
   const getDefaultForm = (data?: Subscription | null) => ({
     platform: data?.platform || "",
     amount: data?.amount?.toString() || "",
@@ -23,6 +32,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
     subscription_date: data?.subscription_date || new Date().toISOString().slice(0, 10),
     next_payment_date: data?.next_payment_date || "",
     custom_end_date: data?.custom_end_date || "",
+    company_id: data?.company_id || defaultCompanyId || "",
   });
 
   const [form, setForm] = useState(getDefaultForm(editData));
@@ -31,7 +41,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
     if (open) {
       setForm(getDefaultForm(editData));
     }
-  }, [open, editData]);
+  }, [open, editData, defaultCompanyId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +58,7 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
       next_payment_date: form.next_payment_date || null,
       custom_end_date: form.billing_cycle === "custom" ? (form.custom_end_date || null) : null,
       canceled_date: editData?.canceled_date || null,
+      company_id: form.company_id || null,
     });
     onClose();
   };
@@ -87,6 +98,22 @@ export function AddSubscriptionModal({ open, onClose, onSubmit, editData }: AddS
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className={labelClass}>Company <span className="text-muted-foreground/50">(optional)</span></label>
+                <select
+                  className={selectClass}
+                  value={form.company_id}
+                  onChange={(e) => setForm({ ...form, company_id: e.target.value })}
+                >
+                  <option value="">Unassigned</option>
+                  {companies.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Platform Name</label>

@@ -1,4 +1,4 @@
-import { MonthlySnapshot, Subscription } from "./types";
+import { Company, MonthlySnapshot, Subscription } from "./types";
 
 export function getUKNow(): Date {
   return new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/London" }));
@@ -48,6 +48,20 @@ export function getTrialCount(subs: Subscription[]): number {
 
 export function getUpcomingPayments(subs: Subscription[]): number {
   return subs.filter((s) => s.status === "active" && getDaysRemaining(s.billing_day, s.next_payment_date) <= 7).length;
+}
+
+export function getCompanyStats(
+  subs: Subscription[],
+  companies: Company[]
+): { company: Company; count: number; monthlySpend: number }[] {
+  return companies.map((company) => {
+    const companySubs = subs.filter((s) => s.company_id === company.id);
+    return {
+      company,
+      count: companySubs.length,
+      monthlySpend: getTotalMonthlySpend(companySubs),
+    };
+  });
 }
 
 export function formatPound(amount: number): string {

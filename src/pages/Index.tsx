@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { Subscription, MonthlySnapshot } from "@/lib/types";
+import { Company, Subscription, MonthlySnapshot } from "@/lib/types";
 import {
   fetchSubscriptions,
   createSubscription,
   deleteSubscription,
   updateSubscription,
 } from "@/lib/subscription-api";
+import { fetchCompanies } from "@/lib/company-api";
 import { fetchSnapshots, ensurePreviousMonthSnapshot } from "@/lib/snapshot-api";
 import {
   getTotalMonthlySpend,
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [snapshots, setSnapshots] = useState<MonthlySnapshot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -36,9 +38,11 @@ const Index = () => {
     if (!org) return;
     async function init() {
       try {
-        const [s, sn] = await Promise.all([
+        const [s, sn, c] = await Promise.all([
           fetchSubscriptions(org.id),
-          fetchSnapshots(org.id)
+          fetchSnapshots(org.id),
+          // Degrade gracefully if the companies table hasn't been migrated yet
+          fetchCompanies(org.id).catch(() => [] as Company[]),
         ]);
 
         // Auto-expire custom subscriptions whose end date has passed
@@ -73,6 +77,7 @@ const Index = () => {
         }
 
         setSnapshots(sn);
+        setCompanies(c);
 
         // Auto-capture previous month if missing
         ensurePreviousMonthSnapshot(s, org.id);
@@ -167,6 +172,7 @@ const Index = () => {
             <SpendChart data={getSpendTrend(subs, snapshots)} />
             <SubscriptionsTable
               subscriptions={subs}
+              companies={companies}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -178,6 +184,7 @@ const Index = () => {
         onClose={() => { setModalOpen(false); setEditSub(null); }}
         onSubmit={handleAdd}
         editData={editSub}
+        companies={companies}
       />
     </DashboardLayout>
   );

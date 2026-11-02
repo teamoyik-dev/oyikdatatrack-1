@@ -10,6 +10,7 @@ import Signup from "./pages/Signup.tsx";
 import CheckEmail from "./pages/CheckEmail.tsx";
 import Index from "./pages/Index.tsx";
 import AllSubscriptions from "./pages/AllSubscriptions.tsx";
+import Companies from "./pages/Companies.tsx";
 import Analytics from "./pages/Analytics.tsx";
 import Settings from "./pages/Settings.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
@@ -52,6 +53,7 @@ const App = () => (
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/subscriptions" element={<AllSubscriptions />} />
+                <Route path="/companies" element={<Companies />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
               </Route>

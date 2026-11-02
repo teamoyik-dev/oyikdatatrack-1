@@ -15,7 +15,7 @@ import {
   Database,
   Image,
 } from "lucide-react";
-import { Subscription } from "@/lib/types";
+import { Company, Subscription } from "@/lib/types";
 import { getDaysRemaining, formatPound } from "@/lib/subscription-utils";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -36,18 +36,29 @@ const planClasses: Record<string, string> = {
 
 interface SubscriptionsTableProps {
   subscriptions: Subscription[];
-
+  /** When provided, shows a Company column and a per-company filter. */
+  companies?: Company[];
   onEdit: (sub: Subscription) => void;
   onDelete: (id: string) => void;
 }
 
 export function SubscriptionsTable({
   subscriptions,
-
+  companies = [],
   onEdit,
   onDelete,
 }: SubscriptionsTableProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
+
+  const showCompany = companies.length > 0;
+  const rows = showCompany
+    ? subscriptions.filter((s) => {
+        if (companyFilter === "all") return true;
+        if (companyFilter === "unassigned") return !s.company_id;
+        return s.company_id === companyFilter;
+      })
+    : subscriptions;
 
   return (
     <motion.div
@@ -56,9 +67,24 @@ export function SubscriptionsTable({
       transition={{ delay: 0.4, duration: 0.4 }}
       className="glass-card overflow-hidden"
     >
-      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-foreground">All Subscriptions</h3>
-        <span className="text-xs text-muted-foreground">{subscriptions.length} total</span>
+        <div className="flex items-center gap-3">
+          {showCompany && (
+            <select
+              value={companyFilter}
+              onChange={(e) => setCompanyFilter(e.target.value)}
+              className="h-8 px-2 rounded-lg bg-[#1a1f2e] border border-white/[0.08] text-xs text-foreground focus:outline-none focus:border-primary/50 [&>option]:bg-[#1a1f2e] [&>option]:text-foreground"
+            >
+              <option value="all">All companies</option>
+              <option value="unassigned">Unassigned</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
+          <span className="text-xs text-muted-foreground">{rows.length} total</span>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -66,6 +92,7 @@ export function SubscriptionsTable({
           <thead>
             <tr className="text-xs text-muted-foreground uppercase tracking-wider border-b border-white/[0.04]">
               <th className="px-6 py-3 text-left font-medium">Platform</th>
+              {showCompany && <th className="px-4 py-3 text-left font-medium">Company</th>}
               <th className="px-4 py-3 text-left font-medium">Amount</th>
               <th className="px-4 py-3 text-left font-medium">Billing Cycle</th>
               <th className="px-4 py-3 text-left font-medium">Days Left</th>
@@ -77,10 +104,11 @@ export function SubscriptionsTable({
             </tr>
           </thead>
           <tbody>
-            {subscriptions.map((sub) => {
+            {rows.map((sub) => {
               const Icon = iconMap[sub.icon || ""] || Bot;
               const days = getDaysRemaining(sub.billing_day, sub.next_payment_date);
               const converted = sub.amount;
+              const companyName = companies.find((c) => c.id === sub.company_id)?.name;
 
               return (
                 <tr
@@ -95,6 +123,11 @@ export function SubscriptionsTable({
                       <span className="font-medium text-foreground">{sub.platform}</span>
                     </div>
                   </td>
+                  {showCompany && (
+                    <td className="px-4 py-3.5 text-muted-foreground text-xs">
+                      {companyName || <span className="opacity-60">Unassigned</span>}
+                    </td>
+                  )}
                   <td className="px-4 py-3.5 font-semibold text-foreground">
                     {formatPound(converted)}
                   </td>

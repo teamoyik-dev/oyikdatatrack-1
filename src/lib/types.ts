@@ -19,6 +19,7 @@ export interface Subscription {
   next_payment_date?: string | null;
   custom_end_date?: string | null;
   org_id?: string;
+  company_id?: string | null;
 }
 
 export interface SpendTrend {
@@ -46,3 +47,10 @@ export type Organization = {
   currency: string;
   created_at: string;
 };
+
+export interface Company {
+  id: string;
+  org_id: string;
+  name: string;
+  created_at: string;
+}

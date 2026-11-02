@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  Building2,
   CreditCard,
   BarChart3,
   Settings,
@@ -13,6 +14,7 @@ import oyikLogo from "@/assets/logo-white.png";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+  { icon: Building2, label: "Companies", path: "/companies" },
   { icon: CreditCard, label: "All Subscriptions", path: "/subscriptions" },
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
   { icon: Settings, label: "Settings", path: "/settings" },

@@ -5,8 +5,9 @@ import {
   Bot, Workflow, Phone, MessageSquare, Globe, FileText, Brain, Palette, Database, Image,
   Calendar, CreditCard, Tag, Clock, ArrowLeft, Edit, Trash2, X,
 } from "lucide-react";
-import { Subscription } from "@/lib/types";
+import { Subscription, Company } from "@/lib/types";
 import { fetchSubscriptions, createSubscription, deleteSubscription, updateSubscription } from "@/lib/subscription-api";
+import { fetchCompanies } from "@/lib/company-api";
 import { getDaysRemaining, formatPound } from "@/lib/subscription-utils";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -31,6 +32,8 @@ const planClasses: Record<string, string> = {
 
 const AllSubscriptions = () => {
   const [subs, setSubs] = useState<Subscription[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editSub, setEditSub] = useState<Subscription | null>(null);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
@@ -39,8 +42,15 @@ const AllSubscriptions = () => {
   useEffect(() => {
     if (org) {
       fetchSubscriptions(org.id).then(setSubs);
+      fetchCompanies(org.id).then(setCompanies).catch(() => setCompanies([]));
     }
   }, [org]);
+
+  const visibleSubs = subs.filter((s) => {
+    if (companyFilter === "all") return true;
+    if (companyFilter === "unassigned") return !s.company_id;
+    return s.company_id === companyFilter;
+  });
 
   const handleAdd = async (data: Omit<Subscription, "id" | "created_at">) => {
     if (editSub) {
@@ -107,10 +117,25 @@ const AllSubscriptions = () => {
                   <h1 className="text-2xl font-bold text-foreground">All Subscriptions</h1>
                   <p className="text-sm text-muted-foreground mt-1">Click a platform to see details</p>
                 </div>
-                <span className="text-sm text-muted-foreground">{subs.length} total subscriptions</span>
+                <div className="flex items-center gap-3">
+                  {companies.length > 0 && (
+                    <select
+                      value={companyFilter}
+                      onChange={(e) => setCompanyFilter(e.target.value)}
+                      className="h-9 px-3 rounded-lg bg-[#1a1f2e] border border-white/[0.08] text-sm text-foreground focus:outline-none focus:border-primary/50 [&>option]:bg-[#1a1f2e] [&>option]:text-foreground"
+                    >
+                      <option value="all">All companies</option>
+                      <option value="unassigned">Unassigned</option>
+                      {companies.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  )}
+                  <span className="text-sm text-muted-foreground">{visibleSubs.length} total subscriptions</span>
+                </div>
               </div>
               <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
-                {subs.map((sub, i) => {
+                {visibleSubs.map((sub, i) => {
                   const Icon = iconMap[sub.icon || ""] || Bot;
                   const amount = sub.amount;
                   return (
@@ -145,7 +170,7 @@ const AllSubscriptions = () => {
         </AnimatePresence>
         )}
       </div>
-      <AddSubscriptionModal open={modalOpen} onClose={() => { setModalOpen(false); setEditSub(null); }} onSubmit={handleAdd} editData={editSub} />
+      <AddSubscriptionModal open={modalOpen} onClose={() => { setModalOpen(false); setEditSub(null); }} onSubmit={handleAdd} editData={editSub} companies={companies} />
     </DashboardLayout>
   );
 };
